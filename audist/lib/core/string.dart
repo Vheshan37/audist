@@ -1,0 +1,137 @@
+import 'package:audist/providers/language_provider.dart';
+
+class Strings {
+  // private constructor to prevent instantiation
+  Strings._();
+
+  // Language provider reference
+  static LanguageProvider? _languageProvider;
+
+  // Method to initialize the language provider
+  static void initialize(LanguageProvider provider) {
+    _languageProvider = provider;
+  }
+
+  // Helper getter to check current language
+  static bool get _isEnglish => _languageProvider?.isEnglish ?? true;
+
+  // common strings
+  static String get appName => "Audist";
+  static String get copyright => "© 2025 Techknow Lanka";
+  static String get appDeveloper =>
+      "Developed by Techknow Lanka Engineers (Pvt) Ltd.";
+
+  // Splash screen strings
+  static Splash get splash => Splash();
+  static Login get login => Login();
+  static Home get home => Home();
+  static NewCase get newCase => NewCase();
+  static LanguageChooser get languageChooser => LanguageChooser();
+  static AddPayment get addPayment => AddPayment();
+  static Ledger get ledger => Ledger();
+}
+
+class Ledger {
+  String get title => _isEnglish ? "Ledger" : "ලෙජරය";
+  String get caseNumber => _isEnglish ? "Case Number" : "නඩු අංකය";
+  String get select => _isEnglish ? "Select" : "තෝරන්න";
+  String get id => _isEnglish ? "ID" : "තීරක අංකය";
+  String get name => _isEnglish ? "Name" : "නම";
+  String get organization => _isEnglish ? "Organization" : "සමිතිය";
+  String get value => _isEnglish ? "Value" : "වටිනාකම";
+  String get date => _isEnglish ? "Date" : "දිනය";
+  String get description => _isEnglish ? "Description" : "විස්තරය";
+  String get payment => _isEnglish ? "Payment" : "අයවීම";
+  String get balance => _isEnglish ? "Balance" : "ශේෂය";
+  String get download => _isEnglish ? "Download" : "බාගත කිරීම";
+}
+
+class AddPayment {
+  String get title => _isEnglish ? "Add Payment" : "මුදල් අයවීම";
+  String get caseNumber => _isEnglish ? "Case Number" : "නඩු අංකය";
+  String get select => _isEnglish ? "Select" : "තෝරන්න";
+  String get id => _isEnglish ? "ID" : "තීරක අංකය";
+  String get name => _isEnglish ? "Name" : "නම";
+  String get organization => _isEnglish ? "Organization" : "සමිතිය";
+  String get value => _isEnglish ? "Value" : "වටිනාකම";
+  String get paymentDate => _isEnglish ? "Payment Date" : "අයවීම් දිනය";
+  String get amount => _isEnglish ? "Amount" : "අයවීම් මුදල";
+  String get balance => _isEnglish ? "Balance" : "ශේෂය";
+  String get other => _isEnglish ? "Other" : "වෙනත්";
+  String get addButtonText =>
+      _isEnglish ? "Add Payment" : "මුදල් අයවීම් එක් කරන්න";
+}
+
+class LanguageChooser {
+  String get title => _isEnglish ? "Choose Language" : "භාෂාව තෝරන්න";
+  String get subTitle =>
+      _isEnglish ? "Select your preferred language." : "ඔබ කැමති භාෂාව තෝරන්න.";
+  String get english => "English";
+  String get sinhala => "සිංහල";
+}
+
+class NewCase {
+  String get title => _isEnglish ? "Add New Case" : "නව නඩුවක් එක් කරන්න";
+  String get id => _isEnglish ? "ID" : "තීරක අංකය";
+  String get number => _isEnglish ? "Case number" : "නඩු අංකය";
+  String get name => _isEnglish ? "Name" : "නම";
+  String get nic => _isEnglish ? "NIC" : "හැදුනුම්පත් අංකය";
+  String get organization => _isEnglish ? "Organization" : "සමිතිය";
+  String get value => _isEnglish ? "Value" : "වටිනාකම";
+  String get nextCaseDate => _isEnglish ? "Next Case Date" : "ඊළඟ නඩු දිනය";
+  String get selectDate => _isEnglish ? "Select Date" : "දිනය තෝරන්න";
+  String get selectImage => _isEnglish ? "Select Image" : "පින්තූරය තෝරන්න";
+  String get insertModel => _isEnglish ? "Insert Model" : "ආකෘතිය ඇතුල් කරන්න";
+  String get insertCase => _isEnglish ? "Insert Case" : "නඩුව ඇතුල් කරන්න";
+  String get noImageSelected =>
+      _isEnglish ? "No image selected." : "පින්තූරයක් තෝරා නොමැත.";
+  // String get subTitle => _isEnglish
+  //     ? "Fill in the details to add a new case."
+  //     : "නව නඩුවක් එක් කිරීමට විස්තර පුරවන්න.";
+  // String get caseNumberHint => _isEnglish ? "Case Number" : "නඩු අංකය";
+  // String get clientNameHint => _isEnglish ? "Client Name" : "ගනුදෙනුකරුගේ නම";
+  // String get addButtonText => _isEnglish ? "Add Case" : "නඩුව එක් කරන්න";
+}
+
+class Splash {
+  String get title => _isEnglish
+      ? "Welcome to ${Strings.appName}"
+      : "${Strings.appName} වෙත සාදරයෙන් පිළිගනිමු";
+  String get subTitle => _isEnglish
+      ? "Manage and track your cases with ease."
+      : "පහසුවෙන් ඔබේ නඩු කළමනාකරණය කර අවධානය යොමු කරන්න";
+}
+
+class Login {
+  String get title => _isEnglish ? "Hello" : "ආයුබෝවන්";
+  String get subTitle => _isEnglish
+      ? "Sign in to manage your cases."
+      : "ඔබේ නඩු කළමනාකරණය කිරීමට ප්‍රවේශ වන්න";
+  String get emailHint => _isEnglish ? "Username" : "පරිශීලක නාමය";
+  String get passwordHint => _isEnglish ? "Password" : "මුරපදය";
+  String get buttonText => _isEnglish ? "Sign In" : "ඇතුල් වන්න";
+  String get doNotHaveAccount =>
+      _isEnglish ? "Don't have an account? " : "ඔබට ගිණුමක් නැද්ද? ";
+  String get contactAdmin =>
+      _isEnglish ? "Contact Administrator" : "පරිපාලකයා අමතන්න";
+}
+
+class Home {
+  String get title => _isEnglish ? "Dashboard" : "ප්‍රධාන පුවරුව";
+  String get subTitle =>
+      _isEnglish ? "Welcome back" : "නැවත ඔබව සාදරයෙන් පිළිගනිමු";
+  String get todayCases => _isEnglish ? "Today's Cases" : "අද දින නඩු සංඛ්‍යාව";
+  String get totalCases => _isEnglish ? "Total Cases" : "සියලු නඩු සංඛ්‍යාව";
+  String get menuItem1 => _isEnglish ? "Add Cases" : "නඩු ඇතුලත් කරන්න";
+  String get menuItem2 =>
+      _isEnglish ? "Case payment" : "මුදල් අයවීම් ඇතුලත් කරන්න";
+  String get menuItem3 => _isEnglish ? "Ledger Management" : "ලෙජරය සැකසීම";
+  String get menuItem4 => _isEnglish ? "Examined Cases" : "විභාග වූ නඩු";
+  String get menuItem5 => _isEnglish ? "Next Cases" : "ඉදිරි නඩු";
+  String get menuItem6 => _isEnglish ? "Settings" : "සැකසුම්";
+}
+
+// Helper extension to check current language
+extension LocalizationHelper on Object {
+  bool get _isEnglish => Strings._languageProvider?.isEnglish ?? true;
+}
