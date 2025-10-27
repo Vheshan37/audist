@@ -1,3 +1,4 @@
+import 'package:audist/presentation/cases/case_history/pages/case_history_screen.dart';
 import 'package:audist/providers/language_provider.dart';
 
 class Strings {
@@ -29,6 +30,35 @@ class Strings {
   static LanguageChooser get languageChooser => LanguageChooser();
   static AddPayment get addPayment => AddPayment();
   static Ledger get ledger => Ledger();
+  static NextCase get nextCase => NextCase();
+  static CaseHistory get caseHistory => CaseHistory();
+  static CasePopUp get casePopUp => CasePopUp();
+}
+
+class CasePopUp{
+  String get caseNumber => _isEnglish ? "Case Number: " : "නඩු අංකය: ";
+  String get id => _isEnglish ? "ID" : "තීරක අංකය";
+  String get name => _isEnglish ? "Name" : "නම";
+  String get organization => _isEnglish ? "Organization" : "සමිතිය";
+  String get value => _isEnglish ? "Value" : "වටිනාකම";
+  String get primaryButton => _isEnglish ? "Register Case Information" : "විභාග විස්තර ඇතුලත් කරන්න";
+  String get secondaryButton => _isEnglish ? "Modify Case Date" : "දිනය යාවත්කාලීන කිරීම";
+}
+
+class CaseHistory {
+  String get title => _isEnglish ? "Examined Cases" : "විභාග වූ නඩු";
+  String get selectDate => _isEnglish ? "Select Date" : "දිනය තෝරන්න";
+  String get caseNumber => _isEnglish ? "Case Number" : "නඩු අංකය";
+  String get name => _isEnglish ? "Name" : "නම";
+  String get actionButton => _isEnglish ? "Refresh" : "යාවත් කාලීන කරන්න";
+}
+
+class NextCase {
+  String get title => _isEnglish ? "Upcoming Cases" : "ඉදිරි නඩු";
+  String get selectDate => _isEnglish ? "Select Date" : "දිනය තෝරන්න";
+  String get caseNumber => _isEnglish ? "Case Number" : "නඩු අංකය";
+  String get name => _isEnglish ? "Name" : "නම";
+  String get actionButton => _isEnglish ? "Refresh" : "යාවත් කාලීන කරන්න";
 }
 
 class Ledger {
@@ -127,7 +157,7 @@ class Home {
       _isEnglish ? "Case payment" : "මුදල් අයවීම් ඇතුලත් කරන්න";
   String get menuItem3 => _isEnglish ? "Ledger Management" : "ලෙජරය සැකසීම";
   String get menuItem4 => _isEnglish ? "Examined Cases" : "විභාග වූ නඩු";
-  String get menuItem5 => _isEnglish ? "Next Cases" : "ඉදිරි නඩු";
+  String get menuItem5 => _isEnglish ? "Upcoming Cases" : "ඉදිරි නඩු";
   String get menuItem6 => _isEnglish ? "Settings" : "සැකසුම්";
 }
 

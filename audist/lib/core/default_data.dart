@@ -17,7 +17,7 @@ class DefaultData {
         // * next cases
         'icon': Icons.next_week_rounded,
         'title': Strings.home.menuItem5,
-        'route': AppRoutes.caseHistory,
+        'route': AppRoutes.nextCase,
       },
       {
         // * add payments

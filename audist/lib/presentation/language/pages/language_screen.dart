@@ -155,7 +155,11 @@ class LanguageScreen extends StatelessWidget {
                                     //     .toggleLanguage();
                                     // isEnglish = changedLanguage;
                                     if (languageProvider.isEnglish) {
-                                      context.read<LanguageProvider>().changeLanguage(false,); // * convert to sinhala
+                                      context
+                                          .read<LanguageProvider>()
+                                          .changeLanguage(
+                                            false,
+                                          ); // * convert to sinhala
                                     }
                                   },
                                   child: Container(
@@ -198,7 +202,7 @@ class LanguageScreen extends StatelessWidget {
                                   await context
                                       .read<LanguageProvider>()
                                       .saveLanguageToLocal();
-                                  AppNavigator.pushReplacement(AppRoutes.login);
+                                  AppNavigator.push(AppRoutes.login);
                                 },
                                 child: Container(
                                   width: 42,

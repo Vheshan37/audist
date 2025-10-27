@@ -68,7 +68,7 @@ class CustomDatePicker extends StatelessWidget {
 
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: initialDate ?? DateTime.now().add(Duration(days: 30)),
+      initialDate: initialDate ?? DateTime.now(),
       firstDate: firstDate ?? DateTime.now().subtract(Duration(days: 1)),
       lastDate: lastDate ?? DateTime.now().add(Duration(days: 365 * 2)),
       builder: (context, child) {
