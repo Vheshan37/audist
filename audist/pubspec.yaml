@@ -41,6 +41,11 @@ dependencies:
   shared_preferences: ^2.5.3
   bloc: ^9.1.0
   data_table_2: ^2.6.0
+  flutter_secure_storage: ^9.2.4
+  firebase_core: ^4.2.0
+  firebase_auth: ^6.1.1
+  flutter_bloc: ^9.1.1
+  get_it: ^8.2.0
 
 
 flutter_launcher_icons:

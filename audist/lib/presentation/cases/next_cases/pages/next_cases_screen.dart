@@ -59,7 +59,7 @@ class NextCasesScreen extends StatelessWidget {
                       itemCount: 10,
                       itemBuilder: (context, index) => GestureDetector(
                         onTap: () {
-                          PopUp().openPopUp(context);
+                          PopUp(isNextCase: true).openPopUp(context);
                         },
                         child: Container(
                           width: double.infinity,
@@ -86,6 +86,17 @@ class NextCasesScreen extends StatelessWidget {
                           ),
                           child: Column(
                             children: [
+                              Container(
+                                alignment: Alignment.centerRight,
+                                child: Text(
+                                  '2025-10-28',
+                                  style: TextStyle(
+                                    color: AppColors.secondaryColor,
+                                    fontSize: AppSizes.bodySmall,
+                                  ),
+                                ),
+                              ),
+                              // Divider(),
                               Row(
                                 children: [
                                   Expanded(
@@ -134,16 +145,6 @@ class NextCasesScreen extends StatelessWidget {
                                     ),
                                   ),
                                 ],
-                              ),
-                              Container(
-                                alignment: Alignment.centerRight,
-                                child: Text(
-                                  '2025-10-28',
-                                  style: TextStyle(
-                                    color: AppColors.secondaryColor,
-                                    fontSize: AppSizes.bodySmall,
-                                  ),
-                                ),
                               ),
                             ],
                           ),

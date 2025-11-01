@@ -1,11 +1,18 @@
 import 'package:audist/common/widgets/custom_button.dart';
+import 'package:audist/common/widgets/custom_date_picker.dart';
 import 'package:audist/core/color.dart';
 import 'package:audist/core/color.dart';
+import 'package:audist/core/navigation/app_navigator.dart';
+import 'package:audist/core/navigation/app_routes.dart';
 import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
 import 'package:flutter/material.dart';
 
 class PopUp {
+  TextEditingController datePickerController = TextEditingController();
+  final bool isNextCase;
+  PopUp({required this.isNextCase});
+
   void openPopUp(BuildContext context) {
     showDialog(
       context: context,
@@ -111,22 +118,39 @@ class PopUp {
                   ),
                 ],
               ),
-              SizedBox(height: AppSizes.spacingLarge),
-              // Buttons
+              if (isNextCase)
+                Column(
+                  children: [
+                    SizedBox(height: AppSizes.spacingLarge),
+                    // Buttons
+                    CustomDatePicker(
+                      textEditingController: datePickerController,
+                      name: "DD/MM/YYYY",
+                    ),
+                    SizedBox(height: AppSizes.spacingSmall),
+                    CustomButton(
+                      content: Text(
+                        Strings.casePopUp.secondaryButton,
+                        style: TextStyle(color: AppColors.surfaceLight),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              SizedBox(height: 10),
+              Divider(),
               CustomButton(
                 content: Text(
                   Strings.casePopUp.primaryButton,
                   style: TextStyle(color: AppColors.surfaceLight),
                 ),
-                onPressed: () => Navigator.pop(context),
-              ),
-              SizedBox(height: 10),
-              CustomButton(
-                content: Text(
-                  Strings.casePopUp.secondaryButton,
-                  style: TextStyle(color: AppColors.surfaceLight),
-                ),
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => {
+                  // close the model
+                  AppNavigator.pop(context),
+
+                  // navigate to case information register page
+                  AppNavigator.push(AppRoutes.caseinformation),
+                },
               ),
             ],
           ),

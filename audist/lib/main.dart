@@ -1,15 +1,24 @@
 import 'package:audist/core/navigation/app_navigator.dart';
 import 'package:audist/core/navigation/app_routes.dart';
 import 'package:audist/core/string.dart';
+import 'package:audist/firebase_options.dart';
+import 'package:audist/presentation/auth/login/bloc/login_bloc.dart';
 import 'package:audist/presentation/home/pages/home_screen.dart';
 import 'package:audist/presentation/splash/pages/splash_screen.dart';
+import 'package:audist/providers/case_information_checkbox_provider.dart';
 import 'package:audist/providers/image_picker_provider.dart';
 import 'package:audist/providers/language_provider.dart';
+import 'package:audist/service_locator.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDependencies();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   runApp(
     MultiProvider(
       providers: [
@@ -17,12 +26,18 @@ void main() {
           create: (context) => LanguageProvider()..getLocalSavedLanguage(),
         ),
         ChangeNotifierProvider(create: (context) => ImagePickerProvider()),
+        ChangeNotifierProvider(
+          create: (context) => CaseInformationCheckboxProvider(),
+        ),
       ],
       child: GestureDetector(
         onLongPress: () {
           _toogleLanguage();
         },
-        child: const MyApp(),
+        child: MultiBlocProvider(
+          providers: [BlocProvider(create: (context) => LoginBloc())],
+          child: const MyApp(),
+        ),
       ),
     ),
   );

@@ -22,7 +22,6 @@ class Strings {
   static String get appDeveloper =>
       "Developed by Techknow Lanka Engineers (Pvt) Ltd.";
 
-  // Splash screen strings
   static Splash get splash => Splash();
   static Login get login => Login();
   static Home get home => Home();
@@ -33,16 +32,41 @@ class Strings {
   static NextCase get nextCase => NextCase();
   static CaseHistory get caseHistory => CaseHistory();
   static CasePopUp get casePopUp => CasePopUp();
+  static CaseInformation get caseInformation => CaseInformation();
 }
 
-class CasePopUp{
-  String get caseNumber => _isEnglish ? "Case Number: " : "නඩු අංකය: ";
+class CaseInformation {
+  String get title => _isEnglish ? "Case Information" : "නඩු විභාග විස්තර";
+  String get caseNumber => _isEnglish ? "Case Number" : "නඩු අංකය";
   String get id => _isEnglish ? "ID" : "තීරක අංකය";
   String get name => _isEnglish ? "Name" : "නම";
   String get organization => _isEnglish ? "Organization" : "සමිතිය";
   String get value => _isEnglish ? "Value" : "වටිනාකම";
-  String get primaryButton => _isEnglish ? "Register Case Information" : "විභාග විස්තර ඇතුලත් කරන්න";
-  String get secondaryButton => _isEnglish ? "Modify Case Date" : "දිනය යාවත්කාලීන කිරීම";
+  String get respondent => _isEnglish ? "Respondent" : "වගඋත්තරකරු";
+  String get summons => _isEnglish ? "Summons" : "සිතාසි";
+  String get newAddress => _isEnglish ? "New Address" : "නව ලිපිනය";
+  String get warrant => _isEnglish ? "Warrants" : "වරෙන්තු";
+  String get nextCaseDate => _isEnglish ? "Next Case Date" : "ඉදිරි නඩු දිනය";
+  String get todaysPayment => _isEnglish ? "Today's Payment" : "අද දින ගෙවීම";
+  String get installment => _isEnglish ? "Installment" : "වාරිකය";
+  String get nextPayableDate => _isEnglish ? "Next Case Date" : "ඉදිරි දිනය";
+  String get judgement => _isEnglish ? "Judgement" : "තීන්දුව";
+  String get otherInformation => _isEnglish ? "Other Information" : "වෙනත් තොරතුරු";
+  String get withdraw => _isEnglish ? "Withdraw" : "ඉල්ලා අස්කරගැනීම";
+  String get testimony => _isEnglish ? "Testimony" : "බහ තැබීම";
+  String get registerButtonText => _isEnglish ? "Register Case Information" : "නඩු විස්තර ඇතුලත් කරන්න";
+}
+
+class CasePopUp {
+  String get caseNumber => _isEnglish ? "Case Number" : "නඩු අංකය";
+  String get id => _isEnglish ? "ID" : "තීරක අංකය";
+  String get name => _isEnglish ? "Name" : "නම";
+  String get organization => _isEnglish ? "Organization" : "සමිතිය";
+  String get value => _isEnglish ? "Value" : "වටිනාකම";
+  String get primaryButton =>
+      _isEnglish ? "Register Case Information" : "විභාග විස්තර ඇතුලත් කරන්න";
+  String get secondaryButton =>
+      _isEnglish ? "Modify Case Date" : "දිනය යාවත්කාලීන කිරීම";
 }
 
 class CaseHistory {
@@ -115,12 +139,6 @@ class NewCase {
   String get insertCase => _isEnglish ? "Insert Case" : "නඩුව ඇතුල් කරන්න";
   String get noImageSelected =>
       _isEnglish ? "No image selected." : "පින්තූරයක් තෝරා නොමැත.";
-  // String get subTitle => _isEnglish
-  //     ? "Fill in the details to add a new case."
-  //     : "නව නඩුවක් එක් කිරීමට විස්තර පුරවන්න.";
-  // String get caseNumberHint => _isEnglish ? "Case Number" : "නඩු අංකය";
-  // String get clientNameHint => _isEnglish ? "Client Name" : "ගනුදෙනුකරුගේ නම";
-  // String get addButtonText => _isEnglish ? "Add Case" : "නඩුව එක් කරන්න";
 }
 
 class Splash {

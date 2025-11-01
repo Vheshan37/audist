@@ -35,6 +35,7 @@ class CustomDatePicker extends StatelessWidget {
         minLines: null,
         decoration: InputDecoration(
           label: Text(name, style: TextStyle(color: AppColors.darkGreyColor)),
+          hintText: "Hello",
           contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
           suffixIcon: Icon(
             Icons.calendar_today,

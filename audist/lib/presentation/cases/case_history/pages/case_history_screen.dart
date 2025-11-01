@@ -59,7 +59,7 @@ class CaseHistoryScreen extends StatelessWidget {
                       itemCount: 10,
                       itemBuilder: (context, index) => GestureDetector(
                         onTap: () {
-                          PopUp().openPopUp(context);
+                          PopUp(isNextCase: false).openPopUp(context);
                         },
                         child: Container(
                           width: double.infinity,

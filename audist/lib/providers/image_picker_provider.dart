@@ -4,33 +4,55 @@ import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ImagePickerProvider extends ChangeNotifier {
-  File? _pickedImage;
-  File? get pickedImage => _pickedImage;
-
   final ImagePicker _picker = ImagePicker();
 
-  Future<void> pickImageFromCamera() async {
+  File? _firstImage;
+  File? _secondImage;
+
+  File? get firstImage => _firstImage;
+  File? get secondImage => _secondImage;
+
+  // Pick first image (used by one interface)
+  Future<void> pickFirstImageFromCamera() async {
     final picked = await _picker.pickImage(source: ImageSource.camera);
     if (picked != null) {
-      _pickedImage = File(picked.path);
+      _firstImage = File(picked.path);
       notifyListeners();
     }
   }
 
-  Future<void> pickImageFromFilePicker() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-    );
-
+  Future<void> pickFirstImageFromFilePicker() async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
     if (result != null && result.files.isNotEmpty) {
-      File file = File(result.files.single.path!);
-      _pickedImage = file;
+      _firstImage = File(result.files.single.path!);
       notifyListeners();
     }
   }
 
-  void clearImage() {
-    _pickedImage = null;
+  // Pick second image (used by another interface)
+  Future<void> pickSecondImageFromCamera() async {
+    final picked = await _picker.pickImage(source: ImageSource.camera);
+    if (picked != null) {
+      _secondImage = File(picked.path);
+      notifyListeners();
+    }
+  }
+
+  Future<void> pickSecondImageFromFilePicker() async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
+    if (result != null && result.files.isNotEmpty) {
+      _secondImage = File(result.files.single.path!);
+      notifyListeners();
+    }
+  }
+
+  void clearFirstImage() {
+    _firstImage = null;
+    notifyListeners();
+  }
+
+  void clearSecondImage() {
+    _secondImage = null;
     notifyListeners();
   }
 }

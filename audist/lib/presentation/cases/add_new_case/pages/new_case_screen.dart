@@ -112,7 +112,7 @@ class NewCaseScreen extends StatelessWidget {
         Stack(
           children: [
             // * 7th row - image preview & picker
-            if (imageProvider.pickedImage != null)
+            if (imageProvider.firstImage != null)
               Container(
                 width: double.infinity,
                 height: 460,
@@ -120,8 +120,8 @@ class NewCaseScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.grey.shade400),
                   image: DecorationImage(
-                    image: FileImage(imageProvider.pickedImage!),
-                    fit: BoxFit.cover,
+                    image: FileImage(imageProvider.firstImage!),
+                    fit: BoxFit.contain,
                   ),
                 ),
               )
@@ -158,7 +158,7 @@ class NewCaseScreen extends StatelessWidget {
               top: 10,
               left: 10,
               child: GestureDetector(
-                onTap: imageProvider.pickImageFromFilePicker,
+                onTap: imageProvider.pickFirstImageFromFilePicker,
                 child: Container(
                   width: 48,
                   height: 48,

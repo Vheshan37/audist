@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "596738505953",
+    "project_id": "audist-49604",
+    "storage_bucket": "audist-49604.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:596738505953:android:358975acd60e1ea2e6cba0",
+        "android_client_info": {
+          "package_name": "com.techknowlk.audist"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdCAH-FRvKsCvAjtQ5jC_8GpVDyb2QNcU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
