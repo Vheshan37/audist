@@ -40,6 +40,7 @@ app.get('/db-check', async (req, res) => {
 });
 
 app.use('/getAllCases', getAllCases);
+app.use('/home', getHomeDetails);
 
 // 404 handler
 app.use((req, res) => {
