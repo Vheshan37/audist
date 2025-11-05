@@ -12,6 +12,7 @@ dotenv.config();
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const getAllCases = require("./src/routes/get_all_cases");
+const getHomeDetails = require("./src/routes/get_home_details");
 
 const app = express();
 app.use(express.json());
@@ -39,6 +40,7 @@ app.get('/db-check', async (req, res) => {
   }
 });
 
+// Register routes BEFORE 404 handler
 app.use('/getAllCases', getAllCases);
 app.use('/home', getHomeDetails);
 
