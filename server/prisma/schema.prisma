@@ -30,7 +30,6 @@ model cases {
   organization     String             @db.VarChar(45)
   value            String             @db.VarChar(45)
   case_date        DateTime           @db.Date
-  created_at       DateTime           @db.DateTime(0)
   image            String             @db.VarChar(255)
   nic              String             @db.VarChar(15)
   user_id          String             @db.VarChar(255)
@@ -38,24 +37,22 @@ model cases {
   case_information case_information[]
   case_status      case_status        @relation(fields: [case_status_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_cases_case_status1")
   user             user               @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_cases_user1")
+  cash_collection  cash_collection[]
 
   @@index([user_id], map: "fk_cases_user1_idx")
   @@index([case_status_id], map: "fk_cases_case_status1_idx")
 }
 
 model case_information {
-  id                Int         @id @default(autoincrement())
-  phase             Int
-  initial_payment   Float
-  settlement_fee    Float
-  next_date         DateTime    @db.Date
-  withdraw          Int         @db.TinyInt
-  testimony         Int         @db.TinyInt
-  image_path        String      @db.VarChar(255)
-  case_person_id    Int
-  cases_case_number String      @db.VarChar(45)
-  case_person       case_person @relation(fields: [case_person_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_case_information_case_person1")
-  cases             cases       @relation(fields: [cases_case_number], references: [case_number], onDelete: NoAction, onUpdate: NoAction, map: "fk_case_information_cases1")
+  id                  Int         @id @default(autoincrement())
+  phase               Int
+  settlement_fee      Float
+  next_settlment_date DateTime    @db.Date
+  image_path          String      @db.VarChar(255)
+  case_person_id      Int
+  cases_case_number   String      @db.VarChar(45)
+  case_person         case_person @relation(fields: [case_person_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_case_information_case_person1")
+  cases               cases       @relation(fields: [cases_case_number], references: [case_number], onDelete: NoAction, onUpdate: NoAction, map: "fk_case_information_cases1")
 
   @@index([case_person_id], map: "fk_case_information_case_person1_idx")
   @@index([cases_case_number], map: "fk_case_information_cases1_idx")
@@ -88,4 +85,15 @@ model case_status {
   id     Int     @id @default(autoincrement())
   status String  @db.VarChar(8)
   cases  cases[]
+}
+
+model cash_collection {
+  id              Int       @id
+  case_number     String    @db.VarChar(45)
+  payment         Float
+  collection_date DateTime? @db.Date
+  description     String?   @db.Text
+  cases           cases     @relation(fields: [case_number], references: [case_number], onDelete: NoAction, onUpdate: NoAction, map: "fk_cash_collection_cases1")
+
+  @@index([case_number], map: "fk_cash_collection_cases1_idx")
 }
