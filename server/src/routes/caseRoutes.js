@@ -1,8 +1,13 @@
 const express = require("express");
-const {caseDetails} = require("../controllers/case/viewCaseWithID");
+const {cases,caseswithDate,addCase,updateCase,updatecaseDate} = require("../controllers/case/getAllCase");
 
 const router = express.Router();
 
-router.get("/getdetaliswithid", caseDetails);
+router.post("/getAll", cases);
+router.post("/add", addCase);
+router.post("/getdetaliswithdate", caseswithDate);
 
-module.exports = router;
+router.post("/updateDate", updatecaseDate);
+router.post("/updateDetails", updateCase);
+
+module.exports = router; 
