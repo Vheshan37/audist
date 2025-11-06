@@ -5,6 +5,5 @@ const router = express.Router();
 
 router.get("/getdetaliswithid", user);
 
-
 module.exports = router;
 
