@@ -7,7 +7,7 @@ router.post("/getAll", cases);
 router.post("/add", addCase);
 router.post("/getdetaliswithdate", caseswithDate);
 
-router.post("/updateDate", updatecaseDate);
-router.post("/updateDetails", updateCase);
+router.put("/updateDate", updatecaseDate);
+router.put("/updateDetails", updateCase);
 
 module.exports = router; 

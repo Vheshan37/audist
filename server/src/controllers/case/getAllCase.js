@@ -113,12 +113,14 @@ const addCase = async (req, res) => {
 };
 
 const updateCase = async (req, res) => {
-  const { caseID, updateData } = req.body;
+  const { caseID, updateData,userID } = req.body;
+  
     try {   
     const updatedCase = await prisma.cases.update({
       where: {
-        id: caseID,     
-        },
+        id: caseID,
+        user_id: userID
+      },
         data: updateData,
     });
     res.status(200).json({ updatedCase });
@@ -129,18 +131,18 @@ const updateCase = async (req, res) => {
 };
 
 const updatecaseDate = async (req, res) => {
-  const { caseID, newDate,userID } = req.body;
-  const case_date = new Date(newDate);  
+  const { caseID, date,userID } = req.body;
+  const case_date = new Date(date);  
     try {   
     const updatedCase = await prisma.cases.update({
       where: {
-        id: caseID,
+        case_number: caseID,
         user_id: userID
       },
       data: { case_date: case_date },
     });
     res.status(200).json({ updatedCase });
-    
+
   } catch (err) {
     console.error("Error updating case date:", err);
     res.status(500).json({ error: "Internal Server Error" });
