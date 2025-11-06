@@ -122,6 +122,7 @@ const updateCase = async (req, res) => {
         user_id: userID
       },
         data: updateData,
+        
     });
     res.status(200).json({ updatedCase });
   } catch (err) {
