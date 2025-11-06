@@ -88,7 +88,15 @@ const caseswithDate = async (req, res) => {
 const addCase = async (req, res) => {
   const { refereeNum, caseNumb, name, organization, value, caseDate, image, nic, userID } = req.body;
   const case_date = new Date(caseDate);
+
   try {
+    const pendingStatus = await prisma.case_status.findFirst({
+      where: { status: "Pending" }
+    });
+
+    if (!pendingStatus) {
+      return res.status(500).json({ error: "Pending status not found in database" });
+    }
     const newCase = await prisma.cases.create({
       data: {
         referee_no: refereeNum,
@@ -100,7 +108,7 @@ const addCase = async (req, res) => {
         image: image,
         user_id: userID,
         nic: nic,
-        case_status_id: 1, 
+        case_status_id: pendingStatus.id, 
       },
     });
     res.status(201).json({ newCase });
@@ -122,7 +130,7 @@ const updateCase = async (req, res) => {
         user_id: userID
       },
         data: updateData,
-        
+
     });
     res.status(200).json({ updatedCase });
   } catch (err) {
@@ -150,4 +158,23 @@ const updatecaseDate = async (req, res) => {
   }
 };
 
-module.exports = { cases, caseswithDate, addCase, updateCase, updatecaseDate };
+const caseDetails = async (req, res) => {
+  const { caseID,userID } = req.body;
+    try {   
+    const caseDetail = await prisma.cases.findUnique({
+      where: {
+        case_number: caseID,
+        user_id: userID
+      },
+      
+    });
+    res.status(200).json({ caseDetail });
+
+  } catch (err) {
+    console.error("Error updating case date:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+module.exports = { cases, caseswithDate, addCase, updateCase, updatecaseDate,caseDetails };
