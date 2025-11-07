@@ -193,7 +193,7 @@ const updateCase = async (req, res) => {
       },
     });
 
-    if (searchCaseInfo.length !== 0 && searchCaseInfo !== null) {
+    if (searchCaseInfo && searchCaseInfo !== null) {
       // const updatedCase = await prisma.case_information.update({
       //   where: { cases_case_number: caseID },
       //   data: {
@@ -248,14 +248,14 @@ const updateCase = async (req, res) => {
       }
     }
 
-    if (judgement.todayPayment==null && judgement.todayPayment.trim() !== "") {
+    if (judgement.todayPayment && judgement.todayPayment.trim() !== "" && Number(judgement.todayPayment) > 0) {
       const addpayment = await prisma.cash_collection.create({
         data: {
           case_number: caseID,
           payment: Number(judgement.todayPayment),
           collection_date: new Date(),
           description: "Case details updated",
-          id: 3,
+         
         },
       });
 
