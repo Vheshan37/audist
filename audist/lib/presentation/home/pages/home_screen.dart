@@ -8,8 +8,12 @@ import 'package:audist/core/navigation/app_routes.dart';
 import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
 import 'package:audist/common/widgets/drawer.dart';
+import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
+import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
+import 'package:audist/presentation/splash/bloc/authorization_bloc.dart';
 import 'package:audist/providers/language_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -103,6 +107,7 @@ class HomeScreen extends StatelessWidget {
                   color: AppColors.brandDark,
                 ),
               ),
+
               Text(
                 Strings.home.subTitle,
                 style: TextStyle(color: AppColors.brandAccent),
@@ -111,45 +116,59 @@ class HomeScreen extends StatelessWidget {
               SizedBox(height: AppSizes.spacingMedium),
 
               // * date section
-              Row(
-                spacing: AppSizes.spacingSmall,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    spacing: AppSizes.spacingMedium,
+              GestureDetector(
+                onTap: () {
+                  debugPrint('Logout requested');
+                  context.read<AuthorizationBloc>().add(RequestLogout());
+                },
+                child: BlocListener<AuthorizationBloc, AuthorizationState>(
+                  listener: (context, state) {
+                    debugPrint('State: $state');
+                    if (state is Logout) {
+                      AppNavigator.pushReplacement(AppRoutes.languageChooser);
+                    }
+                  },
+                  child: Row(
+                    spacing: AppSizes.spacingSmall,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        '17',
-                        style: TextStyle(
-                          fontSize: 48,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.brandDark,
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
+                        spacing: AppSizes.spacingMedium,
                         children: [
                           Text(
-                            'Wednesday',
+                            '17',
                             style: TextStyle(
+                              fontSize: 48,
+                              fontWeight: FontWeight.w900,
                               color: AppColors.brandDark,
-                              fontSize: AppSizes.bodyLarge,
                             ),
                           ),
-                          Text(
-                            'August  2025',
-                            style: TextStyle(
-                              color: AppColors.brandDark,
-                              fontSize: AppSizes.bodySmall,
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Wednesday',
+                                style: TextStyle(
+                                  color: AppColors.brandDark,
+                                  fontSize: AppSizes.bodyLarge,
+                                ),
+                              ),
+                              Text(
+                                'August  2025',
+                                style: TextStyle(
+                                  color: AppColors.brandDark,
+                                  fontSize: AppSizes.bodySmall,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
+                      Icon(Icons.today, color: AppColors.surfaceSecondary),
                     ],
                   ),
-                  Icon(Icons.today, color: AppColors.surfaceSecondary,),
-                ],
+                ),
               ),
             ],
           ),
@@ -179,81 +198,91 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             children: [
               // * case summary
-              Row(
-                spacing: AppSizes.spacingMedium,
-                children: [
-                  // * today's cases
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.all(AppSizes.paddingMedium),
-                      decoration: BoxDecoration(
-                        gradient: AppColors.primaryGradient,
-                        borderRadius: BorderRadius.circular(
-                          AppSizes.borderRadiusLarge,
+              BlocBuilder<FetchCaseBloc, FetchCaseState>(
+                builder: (context, state) {
+                  int todayCount = 0;
+                  int totalCount = 0;
+                  if (state is FetchCaseLoaded) {
+                    todayCount = state.todayCount!;
+                    totalCount = state.totalCount!;
+                  }
+                  return Row(
+                    spacing: AppSizes.spacingMedium,
+                    children: [
+                      // * today's cases
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.all(AppSizes.paddingMedium),
+                          decoration: BoxDecoration(
+                            gradient: AppColors.primaryGradient,
+                            borderRadius: BorderRadius.circular(
+                              AppSizes.borderRadiusLarge,
+                            ),
+                          ),
+                          height: 120,
+                          child: Column(
+                            // mainAxisAlignment: MainAxisAlignment.center,
+                            // crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                todayCount.toString(),
+                                style: TextStyle(
+                                  fontSize: AppSizes.titleLarge,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.surfaceLight,
+                                ),
+                              ),
+                              Text(
+                                Strings.home.todayCases,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: AppSizes.bodyMedium,
+                                  color: AppColors.surfaceLight,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      height: 120,
-                      child: Column(
-                        // mainAxisAlignment: MainAxisAlignment.center,
-                        // crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            '72',
-                            style: TextStyle(
-                              fontSize: AppSizes.titleLarge,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.surfaceLight,
-                            ),
-                          ),
-                          Text(
-                            Strings.home.todayCases,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: AppSizes.bodyMedium,
-                              color: AppColors.surfaceLight,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
 
-                  // * total cases
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.all(AppSizes.paddingMedium),
-                      decoration: BoxDecoration(
-                        gradient: AppColors.primaryGradient,
-                        borderRadius: BorderRadius.circular(
-                          AppSizes.borderRadiusLarge,
+                      // * total cases
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.all(AppSizes.paddingMedium),
+                          decoration: BoxDecoration(
+                            gradient: AppColors.primaryGradient,
+                            borderRadius: BorderRadius.circular(
+                              AppSizes.borderRadiusLarge,
+                            ),
+                          ),
+                          height: 120,
+                          child: Column(
+                            children: [
+                              Text(
+                                totalCount.toString(),
+                                style: TextStyle(
+                                  fontSize: AppSizes.titleLarge,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.surfaceLight,
+                                ),
+                              ),
+                              Text(
+                                Strings.home.totalCases,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: AppSizes.bodyMedium,
+                                  color: AppColors.surfaceLight,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      height: 120,
-                      child: Column(
-                        children: [
-                          Text(
-                            '72',
-                            style: TextStyle(
-                              fontSize: AppSizes.titleLarge,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.surfaceLight,
-                            ),
-                          ),
-                          Text(
-                            Strings.home.totalCases,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: AppSizes.bodyMedium,
-                              color: AppColors.surfaceLight,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                    ],
+                  );
+                },
               ),
 
               SizedBox(height: AppSizes.spacingMedium),

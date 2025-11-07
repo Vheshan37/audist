@@ -7,6 +7,7 @@ import 'package:audist/common/widgets/drawer.dart';
 import 'package:audist/core/color.dart';
 import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
+import 'package:audist/domain/cases/entities/case_entity.dart';
 import 'package:audist/providers/case_information_checkbox_provider.dart';
 import 'package:audist/providers/image_picker_provider.dart';
 import 'package:audist/providers/language_provider.dart';
@@ -18,6 +19,9 @@ class CaseInformationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final CaseEntity caseInformation =
+        ModalRoute.of(context)!.settings.arguments as CaseEntity;
+
     return CustomBackground(
       child: Consumer2<LanguageProvider, ImagePickerProvider>(
         builder: (context, languageProvider, imageProvider, child) => Scaffold(
@@ -29,7 +33,7 @@ class CaseInformationScreen extends StatelessWidget {
             child: Column(
               children: [
                 // * case information
-                _caseInformations(context),
+                _caseInformations(context, caseInformation),
 
                 // * space & horizontal divider
                 SizedBox(height: AppSizes.spacingSmall),
@@ -339,21 +343,21 @@ class CaseInformationScreen extends StatelessWidget {
     );
   }
 
-  Widget _caseInformations(BuildContext context) {
+  Widget _caseInformations(BuildContext context, CaseEntity caseInformation) {
     return Column(
       children: [
         SizedBox(height: AppSizes.spacingSmall),
         Row(
           children: [
             Expanded(flex: 2, child: Text(Strings.caseInformation.caseNumber)),
-            const Expanded(flex: 3, child: Text("data")),
+            Expanded(flex: 3, child: Text(caseInformation.caseNumber!)),
           ],
         ),
         SizedBox(height: AppSizes.spacingSmall),
         Row(
           children: [
             Expanded(flex: 2, child: Text(Strings.caseInformation.id)),
-            const Expanded(flex: 3, child: Text("data")),
+            Expanded(flex: 3, child: Text(caseInformation.refereeNo!)),
           ],
         ),
         SizedBox(height: AppSizes.spacingSmall),
@@ -363,21 +367,21 @@ class CaseInformationScreen extends StatelessWidget {
               flex: 2,
               child: Text(Strings.caseInformation.organization),
             ),
-            const Expanded(flex: 3, child: Text("data")),
+            Expanded(flex: 3, child: Text(caseInformation.organization!)),
           ],
         ),
         SizedBox(height: AppSizes.spacingSmall),
         Row(
           children: [
             Expanded(flex: 2, child: Text(Strings.caseInformation.name)),
-            const Expanded(flex: 3, child: Text("data")),
+            Expanded(flex: 3, child: Text(caseInformation.name!)),
           ],
         ),
         SizedBox(height: AppSizes.spacingSmall),
         Row(
           children: [
             Expanded(flex: 2, child: Text(Strings.caseInformation.value)),
-            const Expanded(flex: 3, child: Text("data")),
+            Expanded(flex: 3, child: Text(caseInformation.value!)),
           ],
         ),
       ],

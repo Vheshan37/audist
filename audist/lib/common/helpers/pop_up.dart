@@ -1,17 +1,19 @@
+import 'package:audist/common/helpers/date_formatter.dart';
 import 'package:audist/common/widgets/custom_button.dart';
 import 'package:audist/common/widgets/custom_date_picker.dart';
-import 'package:audist/core/color.dart';
 import 'package:audist/core/color.dart';
 import 'package:audist/core/navigation/app_navigator.dart';
 import 'package:audist/core/navigation/app_routes.dart';
 import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
+import 'package:audist/domain/cases/entities/case_entity.dart';
 import 'package:flutter/material.dart';
 
 class PopUp {
   TextEditingController datePickerController = TextEditingController();
   final bool isNextCase;
-  PopUp({required this.isNextCase});
+  final CaseEntity? caseInformation;
+  PopUp({required this.isNextCase, this.caseInformation});
 
   void openPopUp(BuildContext context) {
     showDialog(
@@ -42,6 +44,7 @@ class PopUp {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
+                    spacing: AppSizes.spacingSmall,
                     children: [
                       Text(
                         Strings.casePopUp.caseNumber,
@@ -51,8 +54,9 @@ class PopUp {
                           color: AppColors.brandDark,
                         ),
                       ),
+                      Text(":"),
                       Text(
-                        '123456',
+                        caseInformation!.caseNumber!,
                         style: TextStyle(
                           fontSize: AppSizes.bodyMedium,
                           color: AppColors.brandDark,
@@ -61,7 +65,7 @@ class PopUp {
                     ],
                   ),
                   Text(
-                    '2025-10-12',
+                    DateFormatter.formatDate(caseInformation!.caseDate!),
                     style: TextStyle(fontSize: 13, color: Colors.black54),
                   ),
                 ],
@@ -75,7 +79,9 @@ class PopUp {
                   Expanded(flex: 2, child: Text(Strings.casePopUp.id)),
                   Expanded(
                     flex: 3,
-                    child: Row(children: [Text(': '), Text('8971263')]),
+                    child: Row(
+                      children: [Text(': '), Text(caseInformation!.refereeNo!)],
+                    ),
                   ),
                 ],
               ),
@@ -90,7 +96,12 @@ class PopUp {
                   ),
                   Expanded(
                     flex: 3,
-                    child: Row(children: [Text(': '), Text('8971263')]),
+                    child: Row(
+                      children: [
+                        Text(': '),
+                        Text(caseInformation!.organization!),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -102,7 +113,9 @@ class PopUp {
                   Expanded(flex: 2, child: Text(Strings.casePopUp.name)),
                   Expanded(
                     flex: 3,
-                    child: Row(children: [Text(': '), Text('8971263')]),
+                    child: Row(
+                      children: [Text(': '), Text(caseInformation!.name!)],
+                    ),
                   ),
                 ],
               ),
@@ -114,7 +127,9 @@ class PopUp {
                   Expanded(flex: 2, child: Text(Strings.casePopUp.value)),
                   Expanded(
                     flex: 3,
-                    child: Row(children: [Text(': '), Text('8971263')]),
+                    child: Row(
+                      children: [Text(': '), Text(caseInformation!.value!)],
+                    ),
                   ),
                 ],
               ),
@@ -149,7 +164,7 @@ class PopUp {
                   AppNavigator.pop(context),
 
                   // navigate to case information register page
-                  AppNavigator.push(AppRoutes.caseinformation),
+                  AppNavigator.push(AppRoutes.caseinformation, arguments: caseInformation),
                 },
               ),
             ],

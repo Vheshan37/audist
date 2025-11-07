@@ -2,6 +2,7 @@ import 'package:audist/core/exception/login_exception.dart';
 import 'package:audist/data/auth/models/login_response_model.dart';
 import 'package:audist/data/auth/models/user_login_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/widgets.dart';
 
 abstract class FirebaseAuthService {
   Future<LoginResponseModel> login(UserLoginModel params);
@@ -23,8 +24,10 @@ class FirebaseAuthServiceImpl extends FirebaseAuthService {
       final user = credential.user;
 
       if (user != null) {
+        debugPrint('User: $user');
         // Check if email is verified
         if (!user.emailVerified) {
+          await user.sendEmailVerification();
           return LoginResponseModel(
             statusCode: 403, // Forbidden
             message: "Email not verified. Please check your inbox.",
