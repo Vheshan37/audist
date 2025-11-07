@@ -5,8 +5,11 @@ import 'package:audist/core/navigation/app_navigator.dart';
 import 'package:audist/core/navigation/app_routes.dart';
 import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
+import 'package:audist/presentation/auth/login/bloc/login_bloc.dart';
+import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
 import 'package:audist/providers/language_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -14,6 +17,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _formKey = GlobalKey<FormState>();
     TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
 
@@ -118,6 +122,7 @@ class LoginScreen extends StatelessWidget {
 
                         // * Login form
                         Form(
+                          key: _formKey,
                           child: Column(
                             spacing: AppSizes.spacingMedium,
                             children: [
@@ -125,23 +130,77 @@ class LoginScreen extends StatelessWidget {
                                 // * email field
                                 textEditingController: emailController,
                                 name: Strings.login.emailHint,
+                                validatorFunction: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Email is required';
+                                  }
+                                  final emailRegex = RegExp(
+                                    r'^[^@]+@[^@]+\.[^@]+',
+                                  );
+                                  if (!emailRegex.hasMatch(value)) {
+                                    return 'Enter a valid email';
+                                  }
+                                  return null;
+                                },
                               ),
                               Custominput(
                                 // * password field
                                 textEditingController: passwordController,
                                 name: Strings.login.passwordHint,
+                                secure: true,
+                                validatorFunction: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Password is required';
+                                  }
+                                  if (value.length < 6) {
+                                    return 'Password must be at least 6 characters';
+                                  }
+                                  return null;
+                                },
                               ),
-                              CustomButton(
-                                content: Text(
-                                  Strings.login.buttonText,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.surfaceLight,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  // TODO: implement login action
-                                  AppNavigator.pushReplacement(AppRoutes.home);
+                              BlocConsumer<LoginBloc, LoginState>(
+                                listener: (context, state) {
+                                  if (state is LoginSuccess) {
+                                    context.read<FetchCaseBloc>().add(RequestFetchCase(uid: state.userId!));
+                                    AppNavigator.pushReplacement(
+                                      AppRoutes.home,
+                                    );
+                                  } else if (state is LoginFailed) {
+                                    debugPrint(
+                                      'Something else happened: ${state.message}',
+                                    );
+                                  }
+                                },
+                                builder: (context, state) {
+                                  if (state is LoginLoading) {
+                                    debugPrint('login loading');
+                                    return CustomButton(
+                                      content: CircularProgressIndicator(
+                                        color: AppColors.surfaceLight,
+                                      ),
+                                      onPressed: () {},
+                                    );
+                                  }
+                                  return CustomButton(
+                                    content: Text(
+                                      Strings.login.buttonText,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.surfaceLight,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      if (_formKey.currentState!.validate()) {
+                                        context.read<LoginBloc>().add(
+                                          RequestLogin(
+                                            emailController.text.trim(),
+                                            passwordController.text.trim(),
+                                          ),
+                                        );
+                                      }
+                                      // AppNavigator.pushReplacement(AppRoutes.home);
+                                    },
+                                  );
                                 },
                               ),
                               // SizedBox();

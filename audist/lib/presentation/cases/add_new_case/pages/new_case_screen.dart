@@ -46,145 +46,205 @@ class NewCaseScreen extends StatelessWidget {
     TextEditingController organizationController = TextEditingController();
     TextEditingController valueController = TextEditingController();
     TextEditingController nextHearingDateController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
 
-    return Column(
-      spacing: AppSizes.spacingMedium,
-      children: [
-        // * 1st row
-        Row(
+    return Consumer<LanguageProvider>(
+      builder: (context, language, child) => Form(
+        key: formKey,
+        child: Column(
           spacing: AppSizes.spacingMedium,
           children: [
-            Expanded(
-              child: Custominput(
-                textEditingController: caseIdController,
-                name: Strings.newCase.id,
-              ),
-            ),
-            Expanded(
-              child: Custominput(
-                textEditingController: caseNumberController,
-                name: Strings.newCase.number,
-              ),
-            ),
-          ],
-        ),
-
-        // * 2nd row
-        Custominput(
-          textEditingController: nameController,
-          name: Strings.newCase.name,
-        ),
-
-        // * 3rd row
-        Custominput(
-          textEditingController: nameController,
-          name: Strings.newCase.nic,
-        ),
-
-        // * 4th row
-        Custominput(
-          textEditingController: organizationController,
-          name: Strings.newCase.organization,
-        ),
-
-        // * 5th row
-        Custominput(
-          textEditingController: valueController,
-          name: Strings.newCase.value,
-        ),
-
-        // * 6th row next case date label & date picker
-        CustomDatePicker(
-          textEditingController: nextHearingDateController,
-          name: Strings.newCase.nextCaseDate,
-          firstDate: DateTime.now(), // Only future dates
-          lastDate: DateTime.now().add(Duration(days: 365 * 10)),
-          // initialDate: DateTime.now().add(Duration(days: 30)),
-          initialDate: DateTime.now(),
-          validatorFunction: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please select a date';
-            }
-            return null;
-          },
-        ),
-
-        Stack(
-          children: [
-            // * 7th row - image preview & picker
-            if (imageProvider.firstImage != null)
-              Container(
-                width: double.infinity,
-                height: 460,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade400),
-                  image: DecorationImage(
-                    image: FileImage(imageProvider.firstImage!),
-                    fit: BoxFit.contain,
+            // * 1st row
+            Row(
+              spacing: AppSizes.spacingMedium,
+              children: [
+                Expanded(
+                  child: Custominput(
+                    textEditingController: caseIdController,
+                    name: Strings.newCase.id,
+                    validatorFunction: (value) {
+                      if (value == null || value.isEmpty) {
+                        return language.isEnglish
+                            ? 'Referee no is required'
+                            : 'තීරක අංකය අනිවාර්යයි';
+                      }
+                      return null;
+                    },
                   ),
                 ),
-              )
-            else
-              Container(
-                width: double.infinity,
-                height: 460,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
-                  color: Colors.black87,
-                  image: DecorationImage(
-                    image: AssetImage('assets/images/place_holder_image.webp'),
-                    fit: BoxFit.cover,
+                Expanded(
+                  child: Custominput(
+                    textEditingController: caseNumberController,
+                    name: Strings.newCase.number,
+                    validatorFunction: (value) {
+                      if (value == null || value.isEmpty) {
+                        return language.isEnglish
+                            ? 'Case number is required'
+                            : 'නඩු අංකය අනිවාර්යයි';
+                      }
+                      return null;
+                    },
                   ),
                 ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black45,
-                    borderRadius: BorderRadius.circular(
-                      AppSizes.borderRadiusSmall,
+              ],
+            ),
+
+            // * 2nd row
+            Custominput(
+              textEditingController: nameController,
+              name: Strings.newCase.name,
+              validatorFunction: (value) {
+                if (value == null || value.isEmpty) {
+                  return language.isEnglish
+                      ? 'Name is required'
+                      : 'නම අනිවාර්යයි';
+                }
+                return null;
+              },
+            ),
+
+            // * 3rd row
+            Custominput(
+              textEditingController: nameController,
+              name: Strings.newCase.nic,
+              validatorFunction: (value) {
+                if (value == null || value.isEmpty) {
+                  return language.isEnglish
+                      ? 'NIC is required'
+                      : 'හැදුනුම්පත් අංකය අනිවාර්යයි';
+                }
+                return null;
+              },
+            ),
+
+            // * 4th row
+            Custominput(
+              textEditingController: organizationController,
+              name: Strings.newCase.organization,
+              validatorFunction: (value) {
+                if (value == null || value.isEmpty) {
+                  return language.isEnglish
+                      ? 'Organization name is required'
+                      : 'සමිති නාමය අනිවාර්යයි';
+                }
+                return null;
+              },
+            ),
+
+            // * 5th row
+            Custominput(
+              textEditingController: valueController,
+              name: Strings.newCase.value,
+              validatorFunction: (value) {
+                if (value == null || value.isEmpty) {
+                  return language.isEnglish
+                      ? 'Case value is required'
+                      : 'වටිනාකම අනිවාර්යයි';
+                }
+                return null;
+              },
+            ),
+
+            // * 6th row next case date label & date picker
+            CustomDatePicker(
+              textEditingController: nextHearingDateController,
+              name: Strings.newCase.nextCaseDate,
+              firstDate: DateTime.now(), // Only future dates
+              lastDate: DateTime.now().add(Duration(days: 365 * 10)),
+              // initialDate: DateTime.now().add(Duration(days: 30)),
+              initialDate: DateTime.now(),
+              validatorFunction: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please select a date';
+                }
+                return null;
+              },
+            ),
+
+            Stack(
+              children: [
+                // * 7th row - image preview & picker
+                if (imageProvider.firstImage != null)
+                  Container(
+                    width: double.infinity,
+                    height: 460,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade400),
+                      image: DecorationImage(
+                        image: FileImage(imageProvider.firstImage!),
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    width: double.infinity,
+                    height: 460,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade300),
+                      color: Colors.black87,
+                      image: DecorationImage(
+                        image: AssetImage(
+                          'assets/images/place_holder_image.webp',
+                        ),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black45,
+                        borderRadius: BorderRadius.circular(
+                          AppSizes.borderRadiusSmall,
+                        ),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      child: Text(
+                        Strings.newCase.noImageSelected,
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  child: Text(
-                    Strings.newCase.noImageSelected,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
 
-            Positioned(
-              top: 10,
-              left: 10,
-              child: GestureDetector(
-                onTap: imageProvider.pickFirstImageFromFilePicker,
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(64),
-                    color: Colors.black38,
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  child: GestureDetector(
+                    onTap: imageProvider.pickFirstImageFromFilePicker,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(64),
+                        color: Colors.black38,
+                      ),
+                      child: Icon(Icons.upload_outlined, color: Colors.white),
+                    ),
                   ),
-                  child: Icon(Icons.upload_outlined, color: Colors.white),
+                ),
+              ],
+            ),
+
+            // * Submit button
+            CustomButton(
+              content: Text(
+                Strings.newCase.insertCase,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: AppSizes.bodyMedium,
                 ),
               ),
+              onPressed: () {
+                if(formKey.currentState!.validate()){
+                  // context.read<>()
+                }
+              },
             ),
           ],
         ),
-
-        // * Submit button
-        CustomButton(
-          content: Text(
-            Strings.newCase.insertCase,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: AppSizes.bodyMedium,
-            ),
-          ),
-          onPressed: () {},
-        ),
-      ],
+      ),
     );
   }
 }

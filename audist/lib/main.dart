@@ -3,7 +3,9 @@ import 'package:audist/core/navigation/app_routes.dart';
 import 'package:audist/core/string.dart';
 import 'package:audist/firebase_options.dart';
 import 'package:audist/presentation/auth/login/bloc/login_bloc.dart';
+import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
 import 'package:audist/presentation/home/pages/home_screen.dart';
+import 'package:audist/presentation/splash/bloc/authorization_bloc.dart';
 import 'package:audist/presentation/splash/pages/splash_screen.dart';
 import 'package:audist/providers/case_information_checkbox_provider.dart';
 import 'package:audist/providers/image_picker_provider.dart';
@@ -16,8 +18,8 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDependencies();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await initializeDependencies();
 
   runApp(
     MultiProvider(
@@ -35,7 +37,11 @@ void main() async {
           _toogleLanguage();
         },
         child: MultiBlocProvider(
-          providers: [BlocProvider(create: (context) => LoginBloc())],
+          providers: [
+            BlocProvider(create: (context) => LoginBloc()),
+            BlocProvider(create: (context) => AuthorizationBloc()),
+            BlocProvider(create: (context) => FetchCaseBloc()),
+          ],
           child: const MyApp(),
         ),
       ),
@@ -58,8 +64,22 @@ void _toogleLanguage() {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    // Future.microtask(() {
+    //   BlocProvider.of<FetchCaseBloc>(context).add(RequestFetchCase());
+    // });
+  }
 
   @override
   Widget build(BuildContext context) {

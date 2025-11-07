@@ -38,7 +38,7 @@ class Strings {
 class CaseInformation {
   String get title => _isEnglish ? "Case Information" : "නඩු විභාග විස්තර";
   String get caseNumber => _isEnglish ? "Case Number" : "නඩු අංකය";
-  String get id => _isEnglish ? "ID" : "තීරක අංකය";
+  String get id => _isEnglish ? "Referee no" : "තීරක අංකය";
   String get name => _isEnglish ? "Name" : "නම";
   String get organization => _isEnglish ? "Organization" : "සමිතිය";
   String get value => _isEnglish ? "Value" : "වටිනාකම";
@@ -59,7 +59,7 @@ class CaseInformation {
 
 class CasePopUp {
   String get caseNumber => _isEnglish ? "Case Number" : "නඩු අංකය";
-  String get id => _isEnglish ? "ID" : "තීරක අංකය";
+  String get id => _isEnglish ? "Referee no" : "තීරක අංකය";
   String get name => _isEnglish ? "Name" : "නම";
   String get organization => _isEnglish ? "Organization" : "සමිතිය";
   String get value => _isEnglish ? "Value" : "වටිනාකම";
@@ -89,7 +89,7 @@ class Ledger {
   String get title => _isEnglish ? "Ledger" : "ලෙජරය";
   String get caseNumber => _isEnglish ? "Case Number" : "නඩු අංකය";
   String get select => _isEnglish ? "Select" : "තෝරන්න";
-  String get id => _isEnglish ? "ID" : "තීරක අංකය";
+  String get id => _isEnglish ? "Referee no" : "තීරක අංකය";
   String get name => _isEnglish ? "Name" : "නම";
   String get organization => _isEnglish ? "Organization" : "සමිතිය";
   String get value => _isEnglish ? "Value" : "වටිනාකම";
@@ -104,7 +104,7 @@ class AddPayment {
   String get title => _isEnglish ? "Add Payment" : "මුදල් අයවීම";
   String get caseNumber => _isEnglish ? "Case Number" : "නඩු අංකය";
   String get select => _isEnglish ? "Select" : "තෝරන්න";
-  String get id => _isEnglish ? "ID" : "තීරක අංකය";
+  String get id => _isEnglish ? "Referee no" : "තීරක අංකය";
   String get name => _isEnglish ? "Name" : "නම";
   String get organization => _isEnglish ? "Organization" : "සමිතිය";
   String get value => _isEnglish ? "Value" : "වටිනාකම";
@@ -126,7 +126,7 @@ class LanguageChooser {
 
 class NewCase {
   String get title => _isEnglish ? "Add New Case" : "නව නඩුවක් එක් කරන්න";
-  String get id => _isEnglish ? "ID" : "තීරක අංකය";
+  String get id => _isEnglish ? "Referee no" : "තීරක අංකය";
   String get number => _isEnglish ? "Case number" : "නඩු අංකය";
   String get name => _isEnglish ? "Name" : "නම";
   String get nic => _isEnglish ? "NIC" : "හැදුනුම්පත් අංකය";

@@ -15,19 +15,25 @@ class Custominput extends StatelessWidget {
     this.validatorFunction,
   });
 
-  @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: AppSizes.inputFieldHeight,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0), // consistent spacing
       child: TextFormField(
         controller: textEditingController,
         obscureText: secure,
-        expands: true,
-        maxLines: null,
-        minLines: null,
+        maxLines: secure ? 1 : null,
+        minLines: secure ? 1 : null,
         decoration: InputDecoration(
-          label: Text(name, style: TextStyle(color: AppColors.darkGreyColor)),
-          contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+          labelText: name,
+          labelStyle: TextStyle(color: AppColors.darkGreyColor),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: 18.0,
+          ),
+          errorStyle: const TextStyle(
+            height: 0.9, // keeps field from shrinking
+            fontSize: 12,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSizes.borderRadiusMedium),
             borderSide: BorderSide(color: AppColors.brandAccent),
@@ -38,7 +44,10 @@ class Custominput extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSizes.borderRadiusMedium),
-            borderSide: BorderSide(color: AppColors.brandAccent, width: 2.0),
+            borderSide: BorderSide(
+              color: AppColors.brandAccent,
+              width: 2.0,
+            ),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSizes.borderRadiusMedium),
@@ -46,7 +55,10 @@ class Custominput extends StatelessWidget {
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSizes.borderRadiusMedium),
-            borderSide: BorderSide(color: AppColors.errorColor, width: 2.0),
+            borderSide: BorderSide(
+              color: AppColors.errorColor,
+              width: 2.0,
+            ),
           ),
         ),
         validator: validatorFunction,

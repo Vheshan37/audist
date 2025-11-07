@@ -1,3 +1,4 @@
+import 'package:audist/common/helpers/date_formatter.dart';
 import 'package:audist/common/helpers/pop_up.dart';
 import 'package:audist/common/widgets/custom_app_bar.dart';
 import 'package:audist/common/widgets/custom_background.dart';
@@ -7,8 +8,11 @@ import 'package:audist/common/widgets/drawer.dart';
 import 'package:audist/core/color.dart';
 import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
+import 'package:audist/domain/cases/entities/case_entity.dart';
+import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
 import 'package:audist/providers/language_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 class NextCasesScreen extends StatelessWidget {
@@ -52,104 +56,119 @@ class NextCasesScreen extends StatelessWidget {
                         AppSizes.borderRadiusMedium,
                       ),
                     ),
-                    child: ListView.separated(
-                      // padding: EdgeInsets.all(AppSizes.paddingMedium),
-                      separatorBuilder: (context, index) =>
-                          SizedBox(height: 10),
-                      itemCount: 10,
-                      itemBuilder: (context, index) => GestureDetector(
-                        onTap: () {
-                          PopUp(isNextCase: true).openPopUp(context);
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: AppColors.backgroundLight,
-                            borderRadius: BorderRadius.circular(
-                              AppSizes.borderRadiusMedium,
-                            ),
-                            border: Border.all(
-                              color: AppColors.backgroundMuted,
-                            ),
-                            // boxShadow: [
-                            //   BoxShadow(
-                            //     color: Colors.grey.withOpacity(0.25),
-                            //     spreadRadius: 2,
-                            //     blurRadius: 7,
-                            //     offset: Offset(
-                            //       0,
-                            //       3,
-                            //     ), // changes position of shadow
-                            //   ),
-                            // ],
-                          ),
-                          child: Column(
-                            children: [
-                              Container(
-                                alignment: Alignment.centerRight,
-                                child: Text(
-                                  '2025-10-28',
-                                  style: TextStyle(
-                                    color: AppColors.secondaryColor,
-                                    fontSize: AppSizes.bodySmall,
-                                  ),
+                    child: BlocBuilder<FetchCaseBloc, FetchCaseState>(
+                      builder: (context, state) {
+                        List<CaseEntity> list = [];
+                        if (state is FetchCaseLoaded) {
+                          list = state.caseList;
+                        }
+
+                        // * case list
+                        return ListView.separated(
+                          // padding: EdgeInsets.all(AppSizes.paddingMedium),
+                          separatorBuilder: (context, index) =>
+                              SizedBox(height: 10),
+                          itemCount: list.length,
+                          itemBuilder: (context, index) => GestureDetector(
+                            onTap: () {
+                              PopUp(
+                                isNextCase: true,
+                                caseInformation: list[index],
+                              ).openPopUp(context);
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: AppColors.backgroundLight,
+                                borderRadius: BorderRadius.circular(
+                                  AppSizes.borderRadiusMedium,
                                 ),
+                                border: Border.all(
+                                  color: AppColors.backgroundMuted,
+                                ),
+                                // boxShadow: [
+                                //   BoxShadow(
+                                //     color: Colors.grey.withOpacity(0.25),
+                                //     spreadRadius: 2,
+                                //     blurRadius: 7,
+                                //     offset: Offset(
+                                //       0,
+                                //       3,
+                                //     ), // changes position of shadow
+                                //   ),
+                                // ],
                               ),
-                              // Divider(),
-                              Row(
+                              child: Column(
                                 children: [
-                                  Expanded(
-                                    flex: 2,
+                                  Container(
+                                    alignment: Alignment.centerRight,
                                     child: Text(
-                                      Strings.nextCase.caseNumber,
+                                      DateFormatter.formatDate(
+                                        list[index].caseDate,
+                                      ),
                                       style: TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: AppSizes.bodyMedium,
+                                        color: AppColors.secondaryColor,
+                                        fontSize: AppSizes.bodySmall,
                                       ),
                                     ),
                                   ),
-                                  Expanded(
-                                    flex: 3,
-                                    child: Text(
-                                      '123456',
-                                      style: TextStyle(
-                                        // fontWeight: FontWeight.w500,
-                                        fontSize: AppSizes.bodyMedium,
+                                  // Divider(),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 2,
+                                        child: Text(
+                                          Strings.nextCase.caseNumber,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: AppSizes.bodyMedium,
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                      Expanded(
+                                        flex: 3,
+                                        child: Text(
+                                          list[index].caseNumber!,
+                                          style: TextStyle(
+                                            // fontWeight: FontWeight.w500,
+                                            fontSize: AppSizes.bodyMedium,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: AppSizes.spacingSmall),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 2,
+                                        child: Text(
+                                          Strings.nextCase.name,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: AppSizes.bodyMedium,
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 3,
+                                        child: Text(
+                                          list[index].name!,
+                                          style: TextStyle(
+                                            // fontWeight: FontWeight.w500,
+                                            fontSize: AppSizes.bodyMedium,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                              SizedBox(height: AppSizes.spacingSmall),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    flex: 2,
-                                    child: Text(
-                                      Strings.nextCase.name,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: AppSizes.bodyMedium,
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 3,
-                                    child: Text(
-                                      '123456',
-                                      style: TextStyle(
-                                        // fontWeight: FontWeight.w500,
-                                        fontSize: AppSizes.bodyMedium,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ),
                 ),
