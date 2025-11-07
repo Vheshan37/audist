@@ -7,6 +7,6 @@ import 'package:either_dart/either.dart';
 class CaseRepositoryImpl extends CaseRepository {
   @override
   Future<Either> fetchAllCases(FetchCaseRequest request) async {
-    return await sl<CaseDatasource>().fetchAllUsers(request);
+    return await sl<CaseDatasource>().fetchAllCases(request);
   }
 }
