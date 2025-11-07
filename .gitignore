@@ -7,6 +7,9 @@
 .buildlog/
 .history
 
+/server/.idea
+/server/.env
+
 
 
 # Flutter repo-specific
