@@ -12,6 +12,10 @@ dotenv.config();
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const getAllCases = require("./src/routes/get_all_cases");
+const getHomeDetails = require("./src/routes/get_home_details");
+const userRoutes = require("./src/routes/userRoutes");
+const caseRoutes = require("./src/routes/caseRoutes");
+const paymentRoutes = require("./src/routes/paymentRoutes");
 
 const app = express();
 app.use(express.json());
@@ -39,7 +43,13 @@ app.get('/db-check', async (req, res) => {
   }
 });
 
+// Register routes BEFORE 404 handler
 app.use('/getAllCases', getAllCases);
+app.use('/home', getHomeDetails);
+
+app.use('/user', userRoutes);
+app.use('/case', caseRoutes);
+app.use('/payment', paymentRoutes);
 
 // 404 handler
 app.use((req, res) => {
