@@ -6,6 +6,8 @@ import 'package:audist/common/widgets/custom_button.dart';
 import 'package:audist/common/widgets/custom_date_picker.dart';
 import 'package:audist/common/widgets/drawer.dart';
 import 'package:audist/core/color.dart';
+import 'package:audist/core/navigation/app_navigator.dart';
+import 'package:audist/core/navigation/app_routes.dart';
 import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
 import 'package:audist/domain/cases/entities/case_entity.dart';
@@ -32,16 +34,29 @@ class NextCasesScreen extends StatelessWidget {
             child: Column(
               children: [
                 // * 1st row date picker
-                Row(
-                  children: [
-                    Expanded(child: Text(Strings.nextCase.selectDate)),
-                    Expanded(
-                      child: CustomDatePicker(
-                        textEditingController: dateController,
-                        name: 'DD/MM/YYYY',
-                      ),
-                    ),
-                  ],
+                BlocBuilder<FetchCaseBloc, FetchCaseState>(
+                  builder: (context, state) {
+                    List<CaseEntity> list = [];
+                    if (state is FetchCaseLoaded) {
+                      list = state.caseList;
+                    }
+
+                    if (list.isNotEmpty) {
+                      return Row(
+                        children: [
+                          Expanded(child: Text(Strings.nextCase.selectDate)),
+                          Expanded(
+                            child: CustomDatePicker(
+                              textEditingController: dateController,
+                              name: 'DD/MM/YYYY',
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+
+                    return Container();
+                  },
                 ),
 
                 SizedBox(height: AppSizes.spacingMedium),
@@ -63,6 +78,37 @@ class NextCasesScreen extends StatelessWidget {
                           list = state.caseList;
                         }
 
+                        if (list.isEmpty) {
+                          return Container(
+                            padding: EdgeInsets.all(AppSizes.paddingMedium),
+                            child: Column(
+                              spacing: AppSizes.spacingSmall,
+                              children: [
+                                Text(
+                                  "Don't have any pending cases...",
+                                  style: TextStyle(
+                                    fontSize: AppSizes.bodyLarge,
+                                  ),
+                                ),
+                                CustomButton(
+                                  content: Text(
+                                    "Back to home",
+                                    style: TextStyle(
+                                      color: AppColors.surfaceLight,
+                                      fontSize: AppSizes.bodyLarge,
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    AppNavigator.pushReplacement(
+                                      AppRoutes.home,
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
                         // * case list
                         return ListView.separated(
                           // padding: EdgeInsets.all(AppSizes.paddingMedium),
@@ -74,6 +120,7 @@ class NextCasesScreen extends StatelessWidget {
                               PopUp(
                                 isNextCase: true,
                                 caseInformation: list[index],
+                                caseType: context.read<LanguageProvider>().isEnglish ? "Pending Case" : "ඉදිරි නඩුවක්"
                               ).openPopUp(context);
                             },
                             child: Container(

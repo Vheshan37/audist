@@ -7,6 +7,7 @@ import 'package:audist/common/widgets/drawer.dart';
 import 'package:audist/core/color.dart';
 import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
+import 'package:audist/presentation/cases/add_new_case/blocs/add_case/add_case_bloc.dart';
 import 'package:audist/providers/image_picker_provider.dart';
 import 'package:audist/providers/language_provider.dart';
 import 'package:flutter/material.dart';
@@ -52,7 +53,7 @@ class NewCaseScreen extends StatelessWidget {
       builder: (context, language, child) => Form(
         key: formKey,
         child: Column(
-          spacing: AppSizes.spacingMedium,
+          spacing: AppSizes.spacingSmall,
           children: [
             // * 1st row
             Row(
@@ -155,7 +156,9 @@ class NewCaseScreen extends StatelessWidget {
               initialDate: DateTime.now(),
               validatorFunction: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please select a date';
+                  return language.isEnglish
+                      ? 'Please select a date'
+                      : 'ඉදිරි නඩු දිනය අනිවාර්යයි';
                 }
                 return null;
               },
@@ -200,7 +203,10 @@ class NewCaseScreen extends StatelessWidget {
                           AppSizes.borderRadiusSmall,
                         ),
                       ),
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       child: Text(
                         Strings.newCase.noImageSelected,
                         style: TextStyle(color: Colors.white),
@@ -237,9 +243,12 @@ class NewCaseScreen extends StatelessWidget {
                 ),
               ),
               onPressed: () {
-                if(formKey.currentState!.validate()){
-                  // context.read<>()
+                if (formKey.currentState!.validate()) {
+                  // context.read<AddCaseBloc>().add(RequestAddCaseEvent());
                 }
+                debugPrint(
+                  'Next Hearing Date: ${nextHearingDateController.text}',
+                );
               },
             ),
           ],
