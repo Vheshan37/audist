@@ -97,9 +97,61 @@ const addCase = async (req, res) => {
     nic,
     userID,
   } = req.body;
+
+  // 🧾 Validation
+  if (
+    !refereeNum ||
+    !caseNumb ||
+    !name ||
+    !organization ||
+    !value ||
+    !caseDate ||
+    !nic ||
+    !userID
+  ) {
+    return res.status(400).json({
+      error: "All required fields must be provided.",
+      required_fields: [
+        "refereeNum",
+        "caseNumb",
+        "name",
+        "organization",
+        "value",
+        "caseDate",
+        "nic",
+        "userID",
+      ],
+    });
+  }
+
+  // 💡 Optional validation checks
+  if (typeof value !== "number" && isNaN(parseFloat(value))) {
+    return res.status(400).json({ error: "Value must be a number." });
+  }
+
+  // Check date format
   const case_date = new Date(caseDate);
+  if (isNaN(case_date.getTime())) {
+    return res.status(400).json({ error: "Invalid caseDate format." });
+  }
+
+  // Check NIC length (example for SL NIC)
+  if (nic.length < 10 || nic.length > 12) {
+    return res.status(400).json({ error: "Invalid NIC number format." });
+  }
 
   try {
+
+    // 🔍 Check for duplicate case number
+    const existingCase = await prisma.cases.findUnique({
+      where: { case_number: caseNumb },
+    });
+    if (existingCase) {
+      return res
+        .status(409)
+        .json({ error: "Case with this case number already exists." });
+    }
+
     const pendingStatus = await prisma.case_status.findFirst({
       where: { status: "Pending" },
     });
@@ -158,26 +210,26 @@ const updateCase = async (req, res) => {
       console.log("nextCaseDate:", nextCaseDate);
       const nextCaseDateObj = new Date(nextCaseDate);
 
-       
+
       let caseStatusId = null;
-      if(other.withdraw){
+      if (other.withdraw) {
         const caseStatus = await prisma.case_status.findFirst({
           where: { status: "complete" },
         });
         caseStatusId = caseStatus.id;
-      }else if(other.testimony){
+      } else if (other.testimony) {
         const caseStatus = await prisma.case_status.findFirst({
           where: { status: "hold" },
         });
         caseStatusId = caseStatus.id;
 
-      }else{
+      } else {
         const caseStatus = await prisma.case_status.findFirst({
           where: { status: "pending" },
         });
         caseStatusId = caseStatus.id;
       }
-    
+
       const updatedCaseDate = await prisma.cases.update({
         where: {
           case_number: caseID,
@@ -234,7 +286,7 @@ const updateCase = async (req, res) => {
       });
 
       if (judgement.settlementFee && judgement.settlementFee.trim() !== "" && other.image && other.image.trim() !== "") {
-        
+
         const newCase = await prisma.case_information.create({
           data: {
             phase: 1,
@@ -255,11 +307,11 @@ const updateCase = async (req, res) => {
           payment: Number(judgement.todayPayment),
           collection_date: new Date(),
           description: "Case details updated",
-         
+
         },
       });
 
-      if(addpayment){
+      if (addpayment) {
         const caseStatus = await prisma.case_status.findFirst({
           where: { status: "ongoing" },
         });
@@ -268,10 +320,10 @@ const updateCase = async (req, res) => {
             case_number: caseID,
             user_id: userID,
           },
-          data: { case_status_id: caseStatus.id }, 
+          data: { case_status_id: caseStatus.id },
         });
       }
-    }else{
+    } else {
       console.log("No payment to add");
     }
 
@@ -319,8 +371,17 @@ const caseDetails = async (req, res) => {
 
 const getAllCasesByStatus = async (req, res) => {
   try {
-    // Fetch all cases with their statuses
+    const { userID } = req.body;
+
+    if (!userID || userID.trim() === "") {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    // 🔍 Fetch all cases that belong to this user
     const allCases = await prisma.cases.findMany({
+      where: {
+        user_id: userID,
+      },
       select: {
         case_number: true,
         referee_no: true,
@@ -344,6 +405,7 @@ const getAllCasesByStatus = async (req, res) => {
         case_date: "desc",
       },
     });
+
 
     // Initialize empty arrays
     const pending = [];

@@ -11,6 +11,6 @@ router.post("/viewDetails", caseDetails);
 
 router.put("/updateDate", updatecaseDate);
 router.post("/updateDetails", updateCase);
-router.get("/viewallcases", getAllCasesByStatus);
+router.post("/viewallcases", getAllCasesByStatus);
 
 module.exports = router; 
