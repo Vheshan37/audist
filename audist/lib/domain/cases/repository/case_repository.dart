@@ -3,4 +3,5 @@ import 'package:either_dart/either.dart';
 
 abstract class CaseRepository {
   Future<Either> fetchAllCases(FetchCaseRequest request);
+  Future<Either> fetchAllKindOfCases(FetchCaseRequest request);
 }

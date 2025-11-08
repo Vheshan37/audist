@@ -6,12 +6,13 @@ import 'package:flutter/cupertino.dart';
 
 abstract class CaseDatasource {
   Future<Either> fetchAllCases(FetchCaseRequest request);
+  Future<Either> fetchAllKindOfCases(FetchCaseRequest request);
 }
 
 class CaseDatasourceImpl extends CaseDatasource {
   @override
   Future<Either> fetchAllCases(FetchCaseRequest request) async {
-    debugPrint("========================");
+    debugPrint("=============(fetchAllCases)===========");
     debugPrint("fetchAllCases triggered");
     try {
       final dio = DioClient().dio;
@@ -27,7 +28,35 @@ class CaseDatasourceImpl extends CaseDatasource {
       debugPrint('Response (Failed): $e');
       return Left(e);
     } finally {
+      debugPrint("============(fetchAllCases)============");
+    }
+  }
+
+  @override
+  Future<Either> fetchAllKindOfCases(FetchCaseRequest request) async {
+    debugPrint("=============(fetchAllKindOfCases)===========");
+    try {
+      final dio = DioClient().dio;
+
+      final response = await dio.get(
+        '/case/viewallcases',
+        // data: {'userID': request.uid},
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
+
       debugPrint("========================");
+      debugPrint("========================");
+      debugPrint('Response (Success) All Kind of Cases: $response');
+      debugPrint('Response (Success) All Kind of Cases data: ${response.data}');
+      debugPrint("========================");
+      debugPrint("========================");
+
+      return Right(response.data);
+    } catch (e) {
+      debugPrint('Response (Failed): $e');
+      return Left(e);
+    } finally {
+      debugPrint("============(fetchAllKindOfCases)============");
     }
   }
 }

@@ -9,4 +9,9 @@ class CaseRepositoryImpl extends CaseRepository {
   Future<Either> fetchAllCases(FetchCaseRequest request) async {
     return await sl<CaseDatasource>().fetchAllCases(request);
   }
+
+  @override
+  Future<Either> fetchAllKindOfCases(FetchCaseRequest request) async {
+    return await sl<CaseDatasource>().fetchAllKindOfCases(request);
+  }
 }

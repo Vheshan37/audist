@@ -174,7 +174,8 @@ class Home {
   String get menuItem2 =>
       _isEnglish ? "Case payment" : "මුදල් අයවීම් ඇතුලත් කරන්න";
   String get menuItem3 => _isEnglish ? "Ledger Management" : "ලෙජරය සැකසීම";
-  String get menuItem4 => _isEnglish ? "Examined Cases" : "විභාග වූ නඩු";
+  String get menuItem4 => _isEnglish ? "All Cases" : "සියලු නඩු";
+  // String get menuItem4 => _isEnglish ? "Examined Cases" : "විභාග වූ නඩු";
   String get menuItem5 => _isEnglish ? "Upcoming Cases" : "ඉදිරි නඩු";
   String get menuItem6 => _isEnglish ? "Settings" : "සැකසුම්";
 }
