@@ -115,69 +115,77 @@ class CaseInformationScreen extends StatelessWidget {
   }
 
   Widget _imagePickerSection(
-    BuildContext context,
-    ImagePickerProvider imageProvider,
-  ) {
-    return Stack(
-      children: [
-        // * 7th row - image preview & picker
-        if (imageProvider.secondImage != null)
-          Container(
-            width: double.infinity,
-            height: 460,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade400),
-              image: DecorationImage(
-                image: FileImage(imageProvider.secondImage!),
-                fit: BoxFit.contain,
-              ),
-            ),
-          )
-        else
-          Container(
-            width: double.infinity,
-            height: 460,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade300),
-              color: Colors.black87,
-              image: DecorationImage(
-                image: AssetImage('assets/images/place_holder_image.webp'),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black45,
-                borderRadius: BorderRadius.circular(AppSizes.borderRadiusSmall),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              child: Text(
-                Strings.newCase.noImageSelected,
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
+      BuildContext context,
+      ImagePickerProvider imageProvider,
+      ) {
+    final image = imageProvider.secondImage != null
+        ? Image.file(imageProvider.secondImage!)
+        : Image.asset('assets/images/place_holder_image.webp');
 
-        Positioned(
-          top: 10,
-          left: 10,
-          child: GestureDetector(
-            onTap: imageProvider.pickSecondImageFromFilePicker,
-            child: Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(64),
-                color: Colors.black38,
-              ),
-              child: Icon(Icons.upload_outlined, color: Colors.white),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth;
+
+        return Container(
+          width: maxWidth,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade400),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              children: [
+                // Dynamically sized image
+                Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: maxWidth,
+                    ),
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: image,
+                    ),
+                  ),
+                ),
+
+                // Upload button always on top
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  child: GestureDetector(
+                    onTap: imageProvider.pickSecondImageFromFilePicker,
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(64),
+                        color: Colors.black38,
+                      ),
+                      child: Icon(Icons.upload_outlined, color: Colors.white),
+                    ),
+                  ),
+                ),
+
+                // Overlay text only if placeholder, and does not block gestures
+                if (imageProvider.secondImage == null)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: Container(
+                        color: Colors.black45,
+                        alignment: Alignment.center,
+                        child: Text(
+                          Strings.newCase.noImageSelected,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 

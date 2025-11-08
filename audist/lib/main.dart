@@ -3,6 +3,7 @@ import 'package:audist/core/navigation/app_routes.dart';
 import 'package:audist/core/string.dart';
 import 'package:audist/firebase_options.dart';
 import 'package:audist/presentation/auth/login/bloc/login_bloc.dart';
+import 'package:audist/presentation/cases/add_new_case/blocs/add_case/add_case_bloc.dart';
 import 'package:audist/presentation/home/blocs/allcase/all_case_bloc.dart';
 import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
 import 'package:audist/presentation/home/pages/home_screen.dart';
@@ -10,6 +11,7 @@ import 'package:audist/presentation/splash/bloc/authorization_bloc.dart';
 import 'package:audist/presentation/splash/pages/splash_screen.dart';
 import 'package:audist/providers/case_filter_provider.dart';
 import 'package:audist/providers/case_information_checkbox_provider.dart';
+import 'package:audist/providers/common_data_provider.dart';
 import 'package:audist/providers/image_picker_provider.dart';
 import 'package:audist/providers/language_provider.dart';
 import 'package:audist/service_locator.dart';
@@ -34,6 +36,7 @@ void main() async {
           create: (context) => CaseInformationCheckboxProvider(),
         ),
         ChangeNotifierProvider(create: (context) => CaseFilterProvider()),
+        ChangeNotifierProvider(create: (context) => CommonDataProvider(),)
       ],
       child: GestureDetector(
         onLongPress: () {
@@ -45,6 +48,7 @@ void main() async {
             BlocProvider(create: (context) => AuthorizationBloc()),
             BlocProvider(create: (context) => FetchCaseBloc()),
             BlocProvider(create: (context) => AllCaseBloc()),
+            BlocProvider(create: (context) => AddCaseBloc(),)
           ],
           child: const MyApp(),
         ),

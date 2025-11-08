@@ -47,9 +47,11 @@ class AddPaymentScreen extends StatelessWidget {
     TextEditingController amountController = TextEditingController();
     TextEditingController balanceController = TextEditingController();
     TextEditingController otherController = TextEditingController();
+    TextEditingController paidAmountController = TextEditingController();
+    TextEditingController payableAmountController = TextEditingController();
 
     return Column(
-      spacing: AppSizes.spacingMedium,
+      spacing: AppSizes.spacingSmall,
       children: [
         // * 1st row
         Row(
@@ -99,6 +101,43 @@ class AddPaymentScreen extends StatelessWidget {
         Custominput(
           textEditingController: valueController,
           name: Strings.addPayment.value,
+        ),
+
+        Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Text(
+                Strings.addPayment.paidAmount,
+                style: TextStyle(fontSize: AppSizes.bodyLarge),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: Custominput(
+                textEditingController: paidAmountController,
+                name: 'Rs. 0.00',
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Text(
+                Strings.addPayment.dueAmount,
+                style: TextStyle(fontSize: AppSizes.bodyLarge),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: Custominput(
+                textEditingController: paidAmountController,
+                name: 'Rs. 0.00',
+              ),
+            ),
+          ],
         ),
 
         Divider(),

@@ -7,6 +7,7 @@ import 'package:audist/core/string.dart';
 import 'package:audist/data/cases/model/fetch_case_request.dart';
 import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
 import 'package:audist/presentation/splash/bloc/authorization_bloc.dart';
+import 'package:audist/providers/common_data_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -34,6 +35,7 @@ class _SplashScreenState extends State<SplashScreen> {
       listener: (context, state) {
         if (state is Authorized) {
           context.read<FetchCaseBloc>().add(RequestFetchCase(uid: state.uid));
+          context.read<CommonDataProvider>().saveUser(state.uid);
           AppNavigator.pushReplacement(AppRoutes.home);
         }
         if (state is AuthorizationFailed) {
