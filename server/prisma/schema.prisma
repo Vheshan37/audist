@@ -28,7 +28,7 @@ model cases {
   referee_no       String             @map("referee no") @db.VarChar(20)
   name             String             @db.VarChar(45)
   organization     String             @db.VarChar(45)
-  value            String             @db.VarChar(45)
+  value            Float
   case_date        DateTime           @db.Date
   image            String             @db.VarChar(255)
   nic              String             @db.VarChar(15)
