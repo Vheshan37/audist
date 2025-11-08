@@ -108,6 +108,10 @@ class AddPayment {
   String get name => _isEnglish ? "Name" : "නම";
   String get organization => _isEnglish ? "Organization" : "සමිතිය";
   String get value => _isEnglish ? "Value" : "වටිනාකම";
+
+  String get paidAmount => _isEnglish ? "Paid Amount" : "ගෙවා ඇති මුදල";
+  String get dueAmount => _isEnglish ? "Due Amount" : "ගෙවිය යුතු මුදල";
+
   String get paymentDate => _isEnglish ? "Payment Date" : "අයවීම් දිනය";
   String get amount => _isEnglish ? "Amount" : "අයවීම් මුදල";
   String get balance => _isEnglish ? "Balance" : "ශේෂය";
@@ -174,7 +178,8 @@ class Home {
   String get menuItem2 =>
       _isEnglish ? "Case payment" : "මුදල් අයවීම් ඇතුලත් කරන්න";
   String get menuItem3 => _isEnglish ? "Ledger Management" : "ලෙජරය සැකසීම";
-  String get menuItem4 => _isEnglish ? "Examined Cases" : "විභාග වූ නඩු";
+  String get menuItem4 => _isEnglish ? "All Cases" : "සියලු නඩු";
+  // String get menuItem4 => _isEnglish ? "Examined Cases" : "විභාග වූ නඩු";
   String get menuItem5 => _isEnglish ? "Upcoming Cases" : "ඉදිරි නඩු";
   String get menuItem6 => _isEnglish ? "Settings" : "සැකසුම්";
 }

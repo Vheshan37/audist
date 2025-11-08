@@ -7,6 +7,6 @@ const router = express.Router();
 router.get("/getdetaliswithid", payment);
 
 router.post("/getdetails", caseWithCaseNumb);
-router.post("/getpayment", addPayment);
+router.post("/addpayment", addPayment);
 
 module.exports = router;

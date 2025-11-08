@@ -153,9 +153,61 @@ const addCase = async (req, res) => {
     nic,
     userID,
   } = req.body;
+
+  // 🧾 Validation
+  if (
+    !refereeNum ||
+    !caseNumb ||
+    !name ||
+    !organization ||
+    !value ||
+    !caseDate ||
+    !nic ||
+    !userID
+  ) {
+    return res.status(400).json({
+      error: "All required fields must be provided.",
+      required_fields: [
+        "refereeNum",
+        "caseNumb",
+        "name",
+        "organization",
+        "value",
+        "caseDate",
+        "nic",
+        "userID",
+      ],
+    });
+  }
+
+  // 💡 Optional validation checks
+  if (typeof value !== "number" && isNaN(parseFloat(value))) {
+    return res.status(400).json({ error: "Value must be a number." });
+  }
+
+  // Check date format
   const case_date = new Date(caseDate);
+  if (isNaN(case_date.getTime())) {
+    return res.status(400).json({ error: "Invalid caseDate format." });
+  }
+
+  // Check NIC length (example for SL NIC)
+  if (nic.length < 10 || nic.length > 12) {
+    return res.status(400).json({ error: "Invalid NIC number format." });
+  }
 
   try {
+
+    // 🔍 Check for duplicate case number
+    const existingCase = await prisma.cases.findUnique({
+      where: { case_number: caseNumb },
+    });
+    if (existingCase) {
+      return res
+        .status(409)
+        .json({ error: "Case with this case number already exists." });
+    }
+
     const pendingStatus = await prisma.case_status.findFirst({
       where: { status: "Pending" },
     });
@@ -587,6 +639,76 @@ const caseDetails = async (req, res) => {
   }
 };
 
+const getAllCasesByStatus = async (req, res) => {
+  try {
+    const { userID } = req.body;
+
+    if (!userID || userID.trim() === "") {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    // 🔍 Fetch all cases that belong to this user
+    const allCases = await prisma.cases.findMany({
+      where: {
+        user_id: userID,
+      },
+      select: {
+        case_number: true,
+        referee_no: true,
+        name: true,
+        organization: true,
+        value: true,
+        case_date: true,
+        image: true,
+        nic: true,
+        user: {
+          select: {
+            name: true,
+            division: true,
+          },
+        },
+        case_status: {
+          select: { status: true },
+        },
+      },
+      orderBy: {
+        case_date: "desc",
+      },
+    });
+
+
+    // Initialize empty arrays
+    const pending = [];
+    const ongoing = [];
+    const complete = [];
+    const testimony = [];
+
+    // Group cases by status
+    allCases.forEach((caseItem) => {
+      const status = caseItem.case_status.status.toLowerCase();
+
+      if (status === "pending") pending.push(caseItem);
+      else if (status === "ongoing") ongoing.push(caseItem);
+      else if (status === "complete") complete.push(caseItem);
+      else if (status === "testimony") testimony.push(caseItem);
+    });
+
+    // Send grouped response
+    res.status(200).json({
+      pending,
+      ongoing,
+      complete,
+      testimony,
+    });
+  } catch (err) {
+    console.error("Error fetching cases:", err);
+    res.status(500).json({
+      error: "Internal Server Error",
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   cases,
   caseswithDate,
@@ -594,4 +716,5 @@ module.exports = {
   updateCase,
   updatecaseDate,
   caseDetails,
+  getAllCasesByStatus,
 };

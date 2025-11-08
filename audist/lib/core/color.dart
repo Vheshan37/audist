@@ -23,6 +23,9 @@ class AppColors {
   static const Color brandAccentDark = Color(0xFF883964); // muted rose accent
   static const Color brandAccent = Color(0xFF987185); // muted rose accent
 
+  static const Color labelBluePrimary = Color(0xFF0055CD); // deep brown-gray tone
+  static const Color labelBlueSecondary = Color(0x3C004A98); // deep brown-gray tone
+
   // === Backgrounds ===
   static const Color backgroundLight = Color(0xFFF8F5F1); // main app background
   static const Color backgroundMuted = Color(

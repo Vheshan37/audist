@@ -25,14 +25,14 @@ class CustomDatePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: AppSizes.inputFieldHeight,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0), // consistent spacing
       child: TextFormField(
         controller: textEditingController,
         readOnly: true, // Prevent keyboard input
-        expands: true,
+        // expands: true,
         maxLines: null,
-        minLines: null,
+        // minLines: null,
         decoration: InputDecoration(
           label: Text(name, style: TextStyle(color: AppColors.darkGreyColor)),
           hintText: "Hello",
