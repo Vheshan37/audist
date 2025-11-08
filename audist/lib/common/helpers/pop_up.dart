@@ -12,8 +12,9 @@ import 'package:flutter/material.dart';
 class PopUp {
   TextEditingController datePickerController = TextEditingController();
   final bool isNextCase;
+  final String caseType;
   final CaseEntity? caseInformation;
-  PopUp({required this.isNextCase, this.caseInformation});
+  PopUp({required this.isNextCase, this.caseInformation, required this.caseType});
 
   void openPopUp(BuildContext context) {
     showDialog(
@@ -73,6 +74,23 @@ class PopUp {
               Divider(),
               SizedBox(height: AppSizes.spacingMedium),
 
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  // color: AppColors.brandDark,
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(6),
+                  // border: Border.all(color: AppColors.labelBluePrimary),
+                ),
+                child: Text(
+                  caseType,
+                  style: TextStyle(
+                    fontSize: AppSizes.bodySmall,
+                    color: AppColors.surfaceLight,
+                  ),
+                ),
+              ),
+              SizedBox(height: AppSizes.spacingSmall),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -164,7 +182,10 @@ class PopUp {
                   AppNavigator.pop(context),
 
                   // navigate to case information register page
-                  AppNavigator.push(AppRoutes.caseinformation, arguments: caseInformation),
+                  AppNavigator.push(
+                    AppRoutes.caseinformation,
+                    arguments: caseInformation,
+                  ),
                 },
               ),
             ],

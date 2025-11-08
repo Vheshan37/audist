@@ -1,5 +1,6 @@
 const express = require("express");
-const {cases,caseswithDate,addCase,updateCase,updatecaseDate,caseDetails} = require("../controllers/case/getAllCase");
+  
+const {cases,caseswithDate,addCase,updateCase,updatecaseDate,caseDetails ,getAllCasesByStatus} = require("../controllers/case/getAllCase");
 
 const router = express.Router();
 
@@ -10,5 +11,6 @@ router.post("/viewDetails", caseDetails);
 
 router.put("/updateDate", updatecaseDate);
 router.post("/updateDetails", updateCase);
+router.post("/viewallcases", getAllCasesByStatus);
 
 module.exports = router; 

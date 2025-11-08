@@ -1,3 +1,4 @@
+import 'package:audist/common/helpers/app_alert.dart';
 import 'package:audist/common/widgets/custom_app_bar.dart';
 import 'package:audist/common/widgets/custom_background.dart';
 import 'package:audist/common/widgets/custom_button.dart';
@@ -7,18 +8,48 @@ import 'package:audist/common/widgets/drawer.dart';
 import 'package:audist/core/color.dart';
 import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
+import 'package:audist/presentation/cases/add_new_case/blocs/add_case/add_case_bloc.dart';
+import 'package:audist/providers/common_data_provider.dart';
 import 'package:audist/providers/image_picker_provider.dart';
 import 'package:audist/providers/language_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class NewCaseScreen extends StatelessWidget {
+class NewCaseScreen extends StatefulWidget {
   const NewCaseScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
+  State<NewCaseScreen> createState() => _NewCaseScreenState();
+}
 
+class _NewCaseScreenState extends State<NewCaseScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  final TextEditingController caseIdController = TextEditingController();
+  final TextEditingController caseNumberController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController nicController = TextEditingController();
+  final TextEditingController organizationController = TextEditingController();
+  final TextEditingController valueController = TextEditingController();
+  final TextEditingController nextHearingDateController =
+      TextEditingController();
+
+  @override
+  void dispose() {
+    caseIdController.dispose();
+    caseNumberController.dispose();
+    nameController.dispose();
+    nicController.dispose();
+    organizationController.dispose();
+    valueController.dispose();
+    nextHearingDateController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Consumer<LanguageProvider>(
       builder: (context, languageProvider, child) => CustomBackground(
         child: Scaffold(
@@ -29,8 +60,8 @@ class NewCaseScreen extends StatelessWidget {
             builder: (context, imageProvider, child) => SingleChildScrollView(
               padding: EdgeInsets.all(AppSizes.paddingMedium),
               child: Form(
-                key: formKey,
-                child: _formSection(context, imageProvider),
+                key: _formKey,
+                child: _formSection(context, imageProvider, languageProvider),
               ),
             ),
           ),
@@ -39,175 +70,210 @@ class NewCaseScreen extends StatelessWidget {
     );
   }
 
-  Widget _formSection(BuildContext context, ImagePickerProvider imageProvider) {
-    TextEditingController caseIdController = TextEditingController();
-    TextEditingController caseNumberController = TextEditingController();
-    TextEditingController nameController = TextEditingController();
-    TextEditingController organizationController = TextEditingController();
-    TextEditingController valueController = TextEditingController();
-    TextEditingController nextHearingDateController = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-
-    return Consumer<LanguageProvider>(
-      builder: (context, language, child) => Form(
-        key: formKey,
-        child: Column(
-          spacing: AppSizes.spacingMedium,
+  Widget _formSection(
+    BuildContext context,
+    ImagePickerProvider imageProvider,
+    LanguageProvider language,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 1st row: Referee No & Case Number
+        Row(
           children: [
-            // * 1st row
-            Row(
-              spacing: AppSizes.spacingMedium,
+            Expanded(
+              child: Custominput(
+                textEditingController: caseIdController,
+                name: Strings.newCase.id,
+                validatorFunction: (value) {
+                  if (value == null || value.isEmpty) {
+                    return language.isEnglish
+                        ? 'Referee no is required'
+                        : 'තීරක අංකය අනිවාර්යයි';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            SizedBox(width: AppSizes.spacingMedium),
+            Expanded(
+              child: Custominput(
+                textEditingController: caseNumberController,
+                name: Strings.newCase.number,
+                validatorFunction: (value) {
+                  if (value == null || value.isEmpty) {
+                    return language.isEnglish
+                        ? 'Case number is required'
+                        : 'නඩු අංකය අනිවාර්යයි';
+                  }
+                  return null;
+                },
+              ),
+            ),
+          ],
+        ),
+
+        SizedBox(height: AppSizes.spacingSmall),
+
+        // 2nd row: Name
+        Custominput(
+          textEditingController: nameController,
+          name: Strings.newCase.name,
+          validatorFunction: (value) {
+            if (value == null || value.isEmpty) {
+              return language.isEnglish ? 'Name is required' : 'නම අනිවාර්යයි';
+            }
+            return null;
+          },
+        ),
+
+        SizedBox(height: AppSizes.spacingSmall),
+
+        // 3rd row: NIC
+        Custominput(
+          textEditingController: nicController,
+          name: Strings.newCase.nic,
+          validatorFunction: (value) {
+            if (value == null || value.isEmpty) {
+              return language.isEnglish
+                  ? 'NIC is required'
+                  : 'හැදුනුම්පත් අංකය අනිවාර්යයි';
+            }
+            return null;
+          },
+        ),
+
+        SizedBox(height: AppSizes.spacingSmall),
+
+        // 4th row: Organization
+        Custominput(
+          textEditingController: organizationController,
+          name: Strings.newCase.organization,
+          validatorFunction: (value) {
+            if (value == null || value.isEmpty) {
+              return language.isEnglish
+                  ? 'Organization name is required'
+                  : 'සමිති නාමය අනිවාර්යයි';
+            }
+            return null;
+          },
+        ),
+
+        SizedBox(height: AppSizes.spacingSmall),
+
+        // 5th row: Value
+        Custominput(
+          textEditingController: valueController,
+          name: Strings.newCase.value,
+          validatorFunction: (value) {
+            if (value == null || value.isEmpty) {
+              return language.isEnglish
+                  ? 'Case value is required'
+                  : 'වටිනාකම අනිවාර්යයි';
+            }
+            return null;
+          },
+        ),
+
+        SizedBox(height: AppSizes.spacingSmall),
+
+        // 6th row: Next Hearing Date
+        CustomDatePicker(
+          textEditingController: nextHearingDateController,
+          name: Strings.newCase.nextCaseDate,
+          firstDate: DateTime.now(),
+          lastDate: DateTime.now().add(Duration(days: 365 * 10)),
+          initialDate: DateTime.now(),
+          validatorFunction: (value) {
+            if (value == null || value.isEmpty) {
+              return language.isEnglish
+                  ? 'Please select a date'
+                  : 'ඉදිරි නඩු දිනය අනිවාර්යයි';
+            }
+            return null;
+          },
+        ),
+
+        SizedBox(height: AppSizes.spacingSmall),
+
+        // 7th row: Image preview
+        _imagePickerSection(imageProvider),
+
+        SizedBox(height: AppSizes.spacingMedium),
+
+        // 8th row: Submit button
+        BlocConsumer<AddCaseBloc, AddCaseState>(
+          listener: (context, state) {
+            if (state is AddCaseLoaded) {
+              AppAlert.show(
+                context,
+                type: AlertType.success,
+                title: "Case Added Successfully",
+                description:
+                    "Your new case has been added and is now visible in the case list.",
+              );
+            }
+            if (state is AddCaseFailed) {
+              AppAlert.show(
+                context,
+                type: AlertType.error,
+                title: "Failed to Add Case",
+                description:
+                    "Something went wrong while saving your case. Please try again.",
+              );
+            }
+          },
+          builder: (context, state) {
+            if (state is AddCaseLoading) {
+              return CustomButton(
+                content: CircularProgressIndicator(
+                  color: AppColors.surfaceLight,
+                ),
+                onPressed: () {},
+              );
+            }
+            // Normal & Failed state -> show the action button
+            return _actionButton(context);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _imagePickerSection(ImagePickerProvider imageProvider) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth;
+
+        // Use placeholder dimensions if no image is selected
+        final image = imageProvider.firstImage != null
+            ? Image.file(imageProvider.firstImage!)
+            : Image.asset('assets/images/place_holder_image.webp');
+
+        return Container(
+          width: maxWidth,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade400),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
               children: [
-                Expanded(
-                  child: Custominput(
-                    textEditingController: caseIdController,
-                    name: Strings.newCase.id,
-                    validatorFunction: (value) {
-                      if (value == null || value.isEmpty) {
-                        return language.isEnglish
-                            ? 'Referee no is required'
-                            : 'තීරක අංකය අනිවාර්යයි';
-                      }
-                      return null;
-                    },
+                // Dynamically sized image
+                Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: maxWidth,
+                    ),
+                    child: FittedBox(
+                      fit: BoxFit.contain, // ensures no overflow
+                      child: image,
+                    ),
                   ),
                 ),
-                Expanded(
-                  child: Custominput(
-                    textEditingController: caseNumberController,
-                    name: Strings.newCase.number,
-                    validatorFunction: (value) {
-                      if (value == null || value.isEmpty) {
-                        return language.isEnglish
-                            ? 'Case number is required'
-                            : 'නඩු අංකය අනිවාර්යයි';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-              ],
-            ),
 
-            // * 2nd row
-            Custominput(
-              textEditingController: nameController,
-              name: Strings.newCase.name,
-              validatorFunction: (value) {
-                if (value == null || value.isEmpty) {
-                  return language.isEnglish
-                      ? 'Name is required'
-                      : 'නම අනිවාර්යයි';
-                }
-                return null;
-              },
-            ),
-
-            // * 3rd row
-            Custominput(
-              textEditingController: nameController,
-              name: Strings.newCase.nic,
-              validatorFunction: (value) {
-                if (value == null || value.isEmpty) {
-                  return language.isEnglish
-                      ? 'NIC is required'
-                      : 'හැදුනුම්පත් අංකය අනිවාර්යයි';
-                }
-                return null;
-              },
-            ),
-
-            // * 4th row
-            Custominput(
-              textEditingController: organizationController,
-              name: Strings.newCase.organization,
-              validatorFunction: (value) {
-                if (value == null || value.isEmpty) {
-                  return language.isEnglish
-                      ? 'Organization name is required'
-                      : 'සමිති නාමය අනිවාර්යයි';
-                }
-                return null;
-              },
-            ),
-
-            // * 5th row
-            Custominput(
-              textEditingController: valueController,
-              name: Strings.newCase.value,
-              validatorFunction: (value) {
-                if (value == null || value.isEmpty) {
-                  return language.isEnglish
-                      ? 'Case value is required'
-                      : 'වටිනාකම අනිවාර්යයි';
-                }
-                return null;
-              },
-            ),
-
-            // * 6th row next case date label & date picker
-            CustomDatePicker(
-              textEditingController: nextHearingDateController,
-              name: Strings.newCase.nextCaseDate,
-              firstDate: DateTime.now(), // Only future dates
-              lastDate: DateTime.now().add(Duration(days: 365 * 10)),
-              // initialDate: DateTime.now().add(Duration(days: 30)),
-              initialDate: DateTime.now(),
-              validatorFunction: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please select a date';
-                }
-                return null;
-              },
-            ),
-
-            Stack(
-              children: [
-                // * 7th row - image preview & picker
-                if (imageProvider.firstImage != null)
-                  Container(
-                    width: double.infinity,
-                    height: 460,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade400),
-                      image: DecorationImage(
-                        image: FileImage(imageProvider.firstImage!),
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  )
-                else
-                  Container(
-                    width: double.infinity,
-                    height: 460,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade300),
-                      color: Colors.black87,
-                      image: DecorationImage(
-                        image: AssetImage(
-                          'assets/images/place_holder_image.webp',
-                        ),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black45,
-                        borderRadius: BorderRadius.circular(
-                          AppSizes.borderRadiusSmall,
-                        ),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      child: Text(
-                        Strings.newCase.noImageSelected,
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
-
+                // Upload button
                 Positioned(
                   top: 10,
                   left: 10,
@@ -224,27 +290,56 @@ class NewCaseScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+
+                // Overlay text if no image
+                if (imageProvider.firstImage == null)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: Container(
+                        color: Colors.black45,
+                        alignment: Alignment.center,
+                        child: Text(
+                          Strings.newCase.noImageSelected,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
+          ),
+        );
+      },
+    );
+  }
 
-            // * Submit button
-            CustomButton(
-              content: Text(
-                Strings.newCase.insertCase,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: AppSizes.bodyMedium,
-                ),
-              ),
-              onPressed: () {
-                if(formKey.currentState!.validate()){
-                  // context.read<>()
-                }
-              },
-            ),
-          ],
-        ),
+  Widget _actionButton(BuildContext context) {
+    return CustomButton(
+      content: Text(
+        Strings.newCase.insertCase,
+        style: TextStyle(color: Colors.white, fontSize: AppSizes.bodyMedium),
       ),
+      onPressed: () {
+        if (_formKey.currentState!.validate()) {
+          final formattedDate = DateFormat('yyyy-MM-dd').format(
+            DateFormat('dd/MM/yyyy').parse(nextHearingDateController.text),
+          );
+
+          context.read<AddCaseBloc>().add(
+            RequestAddCaseEvent(
+              refereeNo: caseIdController.text,
+              caseId: caseNumberController.text,
+              name: nameController.text,
+              nic: nicController.text,
+              organization: organizationController.text,
+              value: valueController.text,
+              date: formattedDate,
+              userId: context.read<CommonDataProvider>().uid!,
+              image: "",
+            ),
+          );
+        }
+      },
     );
   }
 }
