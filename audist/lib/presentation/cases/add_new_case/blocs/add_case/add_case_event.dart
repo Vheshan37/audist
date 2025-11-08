@@ -10,6 +10,8 @@ class RequestAddCaseEvent extends AddCaseEvent {
   final String organization;
   final String value;
   final String date;
+  final String userId;
+  final String image;
 
   RequestAddCaseEvent({
     required this.refereeNo,
@@ -19,5 +21,7 @@ class RequestAddCaseEvent extends AddCaseEvent {
     required this.organization,
     required this.value,
     required this.date,
+    required this.userId,
+    required this.image
   });
 }

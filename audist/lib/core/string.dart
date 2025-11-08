@@ -108,6 +108,10 @@ class AddPayment {
   String get name => _isEnglish ? "Name" : "නම";
   String get organization => _isEnglish ? "Organization" : "සමිතිය";
   String get value => _isEnglish ? "Value" : "වටිනාකම";
+
+  String get paidAmount => _isEnglish ? "Paid Amount" : "ගෙවා ඇති මුදල";
+  String get dueAmount => _isEnglish ? "Due Amount" : "ගෙවිය යුතු මුදල";
+
   String get paymentDate => _isEnglish ? "Payment Date" : "අයවීම් දිනය";
   String get amount => _isEnglish ? "Amount" : "අයවීම් මුදල";
   String get balance => _isEnglish ? "Balance" : "ශේෂය";
