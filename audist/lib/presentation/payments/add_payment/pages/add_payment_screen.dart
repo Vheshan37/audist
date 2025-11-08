@@ -133,7 +133,7 @@ class AddPaymentScreen extends StatelessWidget {
             Expanded(
               flex: 3,
               child: Custominput(
-                textEditingController: paidAmountController,
+                textEditingController: payableAmountController,
                 name: 'Rs. 0.00',
               ),
             ),
@@ -174,7 +174,7 @@ class AddPaymentScreen extends StatelessWidget {
               flex: 3,
               child: Custominput(
                 textEditingController: amountController,
-                name: '\Rs. 0.00',
+                name: 'Rs. 0.00',
               ),
             ),
           ],
@@ -193,7 +193,7 @@ class AddPaymentScreen extends StatelessWidget {
               flex: 3,
               child: Custominput(
                 textEditingController: balanceController,
-                name: '\Rs. 0.00',
+                name: 'Rs. 0.00',
               ),
             ),
           ],
