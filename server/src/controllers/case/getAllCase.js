@@ -237,25 +237,7 @@ const addCase = async (req, res) => {
   }
 };
 
-// {
-//     "case-id": "12kj3hg",
-//     "respondent": {
-//         "person1":"pending",
-//         "person2":"newAddress",
-//         "person3":"summans"
-//     },
-//     "next-case-date":"2025-11-10",
-//     "judgement":{
-//         "today-payment":"50,000.00",
-//         "settlement-fee":"50,000.00",
-//         "next-settlement-date":"2026-11-10"
-//     },
-//     "other":{
-//         "withdraw": false,
-//         "testimony":false,
-//         "image":"image_path"
-//     }
-// }
+
 
 const updateCase = async (req, res) => {
   const { userID, caseID, respondent, nextCaseDate, judgement, other } =
