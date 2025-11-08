@@ -3,6 +3,62 @@ const { user } = require("../user/viewUserWithID");
 const e = require("express");
 const prisma = new PrismaClient();
 
+// Helper function to validate update case request
+const validateUpdateCaseRequest = (data) => {
+  const errors = [];
+
+  if (!data.userID || data.userID.trim() === "") {
+    errors.push("userID is required");
+  }
+
+  if (!data.caseID || data.caseID.trim() === "") {
+    errors.push("caseID is required");
+  }
+
+  // Validate nextCaseDate if provided
+  if (data.nextCaseDate && data.nextCaseDate.trim() !== "") {
+    const date = new Date(data.nextCaseDate);
+    if (isNaN(date.getTime())) {
+      errors.push("Invalid nextCaseDate format");
+    }
+  }
+
+  // Validate judgement fields if provided
+  if (data.judgement) {
+    if (
+      data.judgement.settlementFee &&
+      data.judgement.settlementFee.toString().trim() !== ""
+    ) {
+      const fee = Number(data.judgement.settlementFee);
+      if (isNaN(fee) || fee < 0) {
+        errors.push("settlementFee must be a valid positive number");
+      }
+    }
+
+    if (
+      data.judgement.todayPayment &&
+      data.judgement.todayPayment.toString().trim() !== ""
+    ) {
+      const payment = Number(data.judgement.todayPayment);
+      if (isNaN(payment) || payment < 0) {
+        errors.push("todayPayment must be a valid positive number");
+      }
+    }
+
+    if (
+      data.judgement.nextSettlementDate &&
+      data.judgement.nextSettlementDate.trim() !== ""
+    ) {
+      const date = new Date(data.judgement.nextSettlementDate);
+      if (isNaN(date.getTime())) {
+        errors.push("Invalid nextSettlementDate format");
+      }
+    }
+  }
+
+  return errors;
+};
+
 const cases = async (req, res) => {
   console.log("All Case details endpoint hit");
 
@@ -201,72 +257,217 @@ const addCase = async (req, res) => {
 //         "image":"image_path"
 //     }
 // }
+
 const updateCase = async (req, res) => {
   const { userID, caseID, respondent, nextCaseDate, judgement, other } =
     req.body;
 
   try {
+    // Input validation using helper function
+    const validationErrors = validateUpdateCaseRequest(req.body);
+    if (validationErrors.length > 0) {
+      return res.status(400).json({
+        error: "Validation failed",
+        details: validationErrors,
+      });
+    }
+
+    // Check if case exists
+    const existingCase = await prisma.cases.findUnique({
+      where: {
+        case_number: caseID,
+      },
+    });
+
+    if (!existingCase) {
+      return res.status(404).json({
+        error: "Case not found",
+      });
+    }
+
+    // Verify user ownership
+    if (existingCase.user_id !== userID) {
+      return res.status(403).json({
+        error: "Unauthorized to update this case",
+      });
+    }
+
+    // Update case date and status if provided
     if (nextCaseDate && nextCaseDate.trim() !== "") {
       console.log("nextCaseDate:", nextCaseDate);
-      const nextCaseDateObj = new Date(nextCaseDate);
 
+      // Validate date format
+      const nextCaseDateObj = new Date(nextCaseDate);
+      if (isNaN(nextCaseDateObj.getTime())) {
+        return res.status(400).json({
+          error: "Invalid date format for nextCaseDate",
+        });
+      }
 
       let caseStatusId = null;
-      if (other.withdraw) {
+
+      // Determine case status based on other fields
+      if (other && other.withdraw) {
         const caseStatus = await prisma.case_status.findFirst({
           where: { status: "complete" },
         });
+        if (!caseStatus) {
+          return res.status(500).json({
+            error: "Complete status not found in database",
+          });
+        }
         caseStatusId = caseStatus.id;
-      } else if (other.testimony) {
+      } else if (other && other.testimony) {
         const caseStatus = await prisma.case_status.findFirst({
           where: { status: "hold" },
         });
+        if (!caseStatus) {
+          return res.status(500).json({
+            error: "Hold status not found in database",
+          });
+        }
         caseStatusId = caseStatus.id;
-
       } else {
         const caseStatus = await prisma.case_status.findFirst({
           where: { status: "pending" },
         });
+        if (!caseStatus) {
+          return res.status(500).json({
+            error: "Pending status not found in database",
+          });
+        }
         caseStatusId = caseStatus.id;
       }
 
-      const updatedCaseDate = await prisma.cases.update({
+      await prisma.cases.update({
         where: {
           case_number: caseID,
-          user_id: userID,
         },
-        data: { case_date: nextCaseDateObj, case_status_id: caseStatusId },
+        data: {
+          case_date: nextCaseDateObj,
+          case_status_id: caseStatusId,
+        },
       });
+
+      const isWithdraw = other?.withdraw === true;
+      const isTestimony = other?.testimony === true;
+
+      if (isWithdraw || isTestimony) {
+        await prisma.case_information.update({
+          where: { cases_case_number: caseID },
+          data: { phase: 3 },
+        });
+      }
     }
 
+    // Handle case information (update or create)
     const searchCaseInfo = await prisma.case_information.findFirst({
       where: {
         cases_case_number: caseID,
       },
+      include: {
+        case_person: true,
+      },
     });
 
-    if (searchCaseInfo && searchCaseInfo !== null) {
-      // const updatedCase = await prisma.case_information.update({
-      //   where: { cases_case_number: caseID },
-      //   data: {
-      //     respondent: respondent,
-      //     next_settlement_date: nextCaseDateObj,
-      //     judgement: judgement,
-      //     other: other,
-      //   },
-      // });
-      console.log(
-        "Case information found, update logic can be implemented here."
-      );
+    if (searchCaseInfo) {
+      // Update existing case information
+      console.log("Case information found, updating existing record");
+
+      // Update case_person if respondent data is provided
+      if (
+        respondent &&
+        (respondent.person1 || respondent.person2 || respondent.person3)
+      ) {
+        const updateData = {};
+
+        if (respondent.person1) {
+          const status1 = await prisma.case_person_status.findFirst({
+            where: { status: respondent.person1 },
+          });
+          if (status1) updateData.person_1 = status1.id;
+        }
+
+        if (respondent.person2) {
+          const status2 = await prisma.case_person_status.findFirst({
+            where: { status: respondent.person2 },
+          });
+          if (status2) updateData.person_2 = status2.id;
+        }
+
+        if (respondent.person3) {
+          const status3 = await prisma.case_person_status.findFirst({
+            where: { status: respondent.person3 },
+          });
+          if (status3) updateData.person_3 = status3.id;
+        }
+
+        if (Object.keys(updateData).length > 0) {
+          await prisma.case_person.update({
+            where: { id: searchCaseInfo.case_person_id },
+            data: updateData,
+          });
+        }
+      }
+
+      // Update case_information if judgement data is provided
+      const caseInfoUpdateData = {};
+
+      if (
+        judgement &&
+        judgement.settlementFee &&
+        judgement.settlementFee.toString().trim() !== ""
+      ) {
+        const settlementFee = Number(judgement.settlementFee);
+        if (!isNaN(settlementFee) && settlementFee >= 0) {
+          caseInfoUpdateData.settlement_fee = settlementFee;
+        }
+      }
+
+      if (
+        judgement &&
+        judgement.nextSettlementDate &&
+        judgement.nextSettlementDate.trim() !== ""
+      ) {
+        const nextSettlementDateObj = new Date(judgement.nextSettlementDate);
+        if (!isNaN(nextSettlementDateObj.getTime())) {
+          caseInfoUpdateData.next_settlment_date = nextSettlementDateObj;
+        }
+      }
+
+      if (other && other.image && other.image.trim() !== "") {
+        caseInfoUpdateData.image_path = other.image;
+      }
+
+      if (Object.keys(caseInfoUpdateData).length > 0) {
+        await prisma.case_information.update({
+          where: { id: searchCaseInfo.id },
+          data: caseInfoUpdateData,
+        });
+      }
     } else {
+      // Create new case information
+      console.log("Case information not found, creating new record");
+
+      if (
+        !respondent ||
+        !respondent.person1 ||
+        !respondent.person2 ||
+        !respondent.person3
+      ) {
+        return res.status(400).json({
+          error:
+            "Respondent information (person1, person2, person3) is required for new case information",
+        });
+      }
+
+      // Validate person statuses
       const status1 = await prisma.case_person_status.findFirst({
         where: { status: respondent.person1 },
       });
-
       const status2 = await prisma.case_person_status.findFirst({
         where: { status: respondent.person2 },
       });
-
       const status3 = await prisma.case_person_status.findFirst({
         where: { status: respondent.person3 },
       });
@@ -277,6 +478,7 @@ const updateCase = async (req, res) => {
         });
       }
 
+      // Create case_person record
       const newCasePerson = await prisma.case_person.create({
         data: {
           person_1: status1.id,
@@ -285,52 +487,120 @@ const updateCase = async (req, res) => {
         },
       });
 
-      if (judgement.settlementFee && judgement.settlementFee.trim() !== "" && other.image && other.image.trim() !== "") {
+      // Create case_information if required fields are provided
+      // Build required fields
+      const dataObj = {
+        phase: 1,
+        case_person_id: newCasePerson.id,
+        cases_case_number: caseID,
+      };
 
-        const newCase = await prisma.case_information.create({
-          data: {
-            phase: 1,
-            settlement_fee: Number(judgement.settlementFee),
-            next_settlment_date: new Date(judgement.nextSettlementDate),
-            image_path: other.image,
-            case_person_id: newCasePerson.id,
-            cases_case_number: caseID,
-          },
-        });
+      // Optional: settlement_fee
+      if (
+        judgement &&
+        judgement.settlementFee &&
+        judgement.settlementFee.toString().trim() !== ""
+      ) {
+        const settlementFee = Number(judgement.settlementFee);
+        if (isNaN(settlementFee) || settlementFee < 0 ) {
+          return res
+            .status(400)
+            .json({ error: "Invalid settlement fee amount" });
+        }
+        dataObj.settlement_fee = Number(settlementFee);
       }
-    }
 
-    if (judgement.todayPayment && judgement.todayPayment.trim() !== "" && Number(judgement.todayPayment) > 0) {
-      const addpayment = await prisma.cash_collection.create({
-        data: {
-          case_number: caseID,
-          payment: Number(judgement.todayPayment),
-          collection_date: new Date(),
-          description: "Case details updated",
+      // Optional: next_settlment_date
+      if (
+        judgement &&
+        judgement.nextSettlementDate &&
+        judgement.nextSettlementDate.trim() !== ""
+      ) {
+        const nextSettlementDateObj = new Date(judgement.nextSettlementDate);
+        if (isNaN(nextSettlementDateObj.getTime())) {
+          return res
+            .status(400)
+            .json({ error: "Invalid next settlement date format" });
+        }
+        dataObj.next_settlment_date = nextSettlementDateObj;
+      }
 
-        },
+      // Optional: image_path
+      if (other && other.image && other.image.trim() !== "") {
+        dataObj.image_path = other.image;
+      }
+
+      // Save the record
+      await prisma.case_information.create({
+        data: dataObj,
       });
-
-      if (addpayment) {
-        const caseStatus = await prisma.case_status.findFirst({
-          where: { status: "ongoing" },
-        });
-        const updatedCase = await prisma.cases.update({
-          where: {
-            case_number: caseID,
-            user_id: userID,
-          },
-          data: { case_status_id: caseStatus.id },
-        });
-      }
-    } else {
-      console.log("No payment to add");
     }
 
+    // Handle payment if provided
+    if (
+      judgement &&
+      judgement.todayPayment &&
+      judgement.todayPayment.toString().trim() !== ""
+    ) {
+      const paymentAmount = Number(judgement.todayPayment);
 
-    res.status(200).json({ message: "Case updated successfully" });
+      if (!isNaN(paymentAmount) && paymentAmount > 0) {
+        const addpayment = await prisma.cash_collection.create({
+          data: {
+            case_number: caseID,
+            payment: paymentAmount,
+            collection_date: new Date(),
+            description: "Case details updated",
+          },
+        });
+
+        if (addpayment) {
+          const ongoingStatus = await prisma.case_status.findFirst({
+            where: { status: "ongoing" },
+          });
+
+          if (ongoingStatus) {
+            await prisma.cases.update({
+              where: {
+                case_number: caseID,
+              },
+              data: { case_status_id: ongoingStatus.id },
+            });
+            await prisma.case_information.update({
+              where: {
+                cases_case_number: caseID,
+              },
+              data: {
+                phase: 2,
+              },
+            });
+          }
+        }
+      } else if (paymentAmount < 0) {
+        return res.status(400).json({
+          error: "Payment amount cannot be negative",
+        });
+      }
+    }
+
+    res.status(200).json({
+      message: "Case updated successfully",
+      caseID: caseID,
+    });
   } catch (err) {
     console.error("Error updating case:", err);
+
+    // Handle specific Prisma errors
+    if (err.code === "P2002") {
+      return res.status(400).json({ error: "Duplicate entry found" });
+    } else if (err.code === "P2025") {
+      return res.status(404).json({ error: "Record not found" });
+    } else if (err.code === "P2003") {
+      return res
+        .status(400)
+        .json({ error: "Foreign key constraint violation" });
+    }
+
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
