@@ -197,7 +197,6 @@ const addCase = async (req, res) => {
   }
 
   try {
-
     // 🔍 Check for duplicate case number
     const existingCase = await prisma.cases.findUnique({
       where: { case_number: caseNumb },
@@ -353,7 +352,7 @@ const updateCase = async (req, res) => {
       const isTestimony = other?.testimony === true;
 
       if (isWithdraw || isTestimony) {
-        await prisma.case_information.update({
+        await prisma.case_information.updateMany({
           where: { cases_case_number: caseID },
           data: { phase: 3 },
         });
@@ -502,7 +501,7 @@ const updateCase = async (req, res) => {
         judgement.settlementFee.toString().trim() !== ""
       ) {
         const settlementFee = Number(judgement.settlementFee);
-        if (isNaN(settlementFee) || settlementFee < 0 ) {
+        if (isNaN(settlementFee) || settlementFee < 0) {
           return res
             .status(400)
             .json({ error: "Invalid settlement fee amount" });
@@ -566,7 +565,7 @@ const updateCase = async (req, res) => {
               },
               data: { case_status_id: ongoingStatus.id },
             });
-            await prisma.case_information.update({
+            await prisma.case_information.updateMany({
               where: {
                 cases_case_number: caseID,
               },
@@ -676,7 +675,6 @@ const getAllCasesByStatus = async (req, res) => {
       },
     });
 
-
     // Initialize empty arrays
     const pending = [];
     const ongoing = [];
@@ -709,6 +707,95 @@ const getAllCasesByStatus = async (req, res) => {
   }
 };
 
+const allCaseDetails = async (req, res) => {
+  const { caseID, userID } = req.body;
+
+  try {
+    const caseDetail = await prisma.cases.findUnique({
+      where: { case_number: caseID },
+      include: {
+        case_status: true,
+        case_information: {
+          include: {
+            case_person: {
+              include: {
+                 case_person_status_case_person_person_1Tocase_person_status: true,
+                case_person_status_case_person_person_2Tocase_person_status: true,
+                case_person_status_case_person_person_3Tocase_person_status: true,
+              }
+            }
+          }
+        },
+        cash_collection: true
+      }
+    });
+
+    if (!caseDetail) {
+      return res.status(404).json({ error: "Case not found" });
+    }
+
+    if (caseDetail.user_id !== userID) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const info = caseDetail.case_information[0];
+    const person = info?.case_person;
+
+    const output = {
+      case: {
+        caseNumber: caseDetail.case_number,
+        refereeNo: caseDetail.referee_no,
+        name: caseDetail.name,
+        organization: caseDetail.organization,
+        value: caseDetail.value,
+        date: caseDetail.case_date,
+        status: {
+          id: caseDetail.case_status.id,
+          label: caseDetail.case_status.status
+        }
+      },
+
+      respondent: {
+        person1: {
+          statusId: person?.person_1,
+          status: person?.person1Status?.status
+        },
+        person2: {
+          statusId: person?.person_2,
+          status: person?.person2Status?.status
+        },
+        person3: {
+          statusId: person?.person_3,
+          status: person?.person3Status?.status
+        }
+      },
+
+      information: info
+        ? {
+            phase: info.phase,
+            settlementFee: info.settlement_fee,
+            nextSettlementDate: info.next_settlment_date,
+            image: info.image_path
+          }
+        : null,
+
+      payments: caseDetail.cash_collection.map((p) => ({
+        payment: p.payment,
+        date: p.collection_date,
+        description: p.description
+      }))
+    };
+
+    return res.status(200).json(output);
+
+  } catch (err) {
+    console.error("Error:", err);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+
 module.exports = {
   cases,
   caseswithDate,
@@ -717,4 +804,5 @@ module.exports = {
   updatecaseDate,
   caseDetails,
   getAllCasesByStatus,
+  allCaseDetails,
 };
