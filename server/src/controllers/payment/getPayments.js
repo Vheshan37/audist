@@ -81,17 +81,39 @@ const caseWithCaseNumb = async (req, res) => {
 
 
 const addPayment = async (req, res) => {
-  const { case_number, payment, payment_date, next_payment_date, description } = req.body;
+  const {
+    case_number,
+    payment,
+    payment_date,
+    next_payment_date,
+    description,
+    userID,
+  } = req.body;
 
   // 🧾 Validate required fields
-  if (!case_number || !payment || !payment_date || !next_payment_date) {
+  if (!case_number || !payment || !payment_date || !next_payment_date || !userID) {
     return res.status(400).json({
-      error: "case_number, payment, payment_date, and next_payment_date are required.",
+      error:
+        "case_number, payment, payment_date, next_payment_date, and userID are required.",
     });
   }
 
   try {
-    // 🔹 1️⃣ Insert payment record into `cash_collection`
+    // 🔍 1️⃣ Validate that the case_number belongs to the given user_id
+    const existingCase = await prisma.cases.findFirst({
+      where: {
+        case_number: case_number,
+        user_id: userID,
+      },
+    });
+
+    if (!existingCase) {
+      return res.status(404).json({
+        error: "Case not found or does not belong to the given user.",
+      });
+    }
+
+    // 💰 2️⃣ Add new payment record
     const newPayment = await prisma.cash_collection.create({
       data: {
         case_number,
@@ -101,13 +123,13 @@ const addPayment = async (req, res) => {
       },
     });
 
-    // 🔹 2️⃣ Update next settlement date in `case_information`
+    // 📅 3️⃣ Update the next settlement date in related case_information
     const updatedCaseInfo = await prisma.case_information.updateMany({
       where: { cases_case_number: case_number },
       data: { next_settlment_date: new Date(next_payment_date) },
     });
 
-    // ⚙️ 3️⃣ Response back to client
+    // ✅ 4️⃣ Respond with success
     res.status(200).json({
       message: "Payment added and next settlement date updated successfully.",
       payment: newPayment,
@@ -118,5 +140,7 @@ const addPayment = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+
 
 module.exports = { caseWithCaseNumb , addPayment };
