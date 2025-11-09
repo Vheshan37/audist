@@ -30,7 +30,7 @@ class FirebaseAuthServiceImpl extends FirebaseAuthService {
           await user.sendEmailVerification();
           return LoginResponseModel(
             statusCode: 403, // Forbidden
-            message: "Email not verified. Please check your inbox.",
+            message: "Account not verified. Please check your inbox.",
           );
         }
 

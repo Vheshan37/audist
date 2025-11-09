@@ -9,6 +9,13 @@ class CaseFilterProvider extends ChangeNotifier {
     {'eng': 'Withdrawn Cases', 'sin': 'ඉල්ලා අස් කළ නඩු'},
   ];
 
+  Map<String, Map<String, String>> get caseTypeLocalized => {
+    'Ongoing Cases': {'eng': 'Ongoing Case', 'sin': 'පවතින නඩුවක්'},
+    'Completed Cases': {'eng': 'Completed Case', 'sin': 'අවසන් නඩුවක්'},
+    'Testimony Cases': {'eng': 'Testimony Case', 'sin': 'බහ තැබූ නඩුවක්'},
+    'Withdrawn Cases': {'eng': 'Withdrawn Case', 'sin': 'ඉල්ලා අස් කළ නඩුවක්'},
+  };
+
   List<CaseObject> caseList = [];
   late AllCaseModel allCases;
 
@@ -19,7 +26,7 @@ class CaseFilterProvider extends ChangeNotifier {
 
   String localizedSelectedFilter(bool isEnglish) {
     final match = _filterOptions.firstWhere(
-          (opt) => opt['eng'] == _selectedFilter,
+      (opt) => opt['eng'] == _selectedFilter,
       orElse: () => _filterOptions.first,
     );
     return match[isEnglish ? 'eng' : 'sin']!;

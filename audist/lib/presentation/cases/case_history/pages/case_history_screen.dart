@@ -11,6 +11,7 @@ import 'package:audist/domain/cases/entities/case_entity.dart';
 import 'package:audist/providers/case_filter_provider.dart';
 import 'package:audist/providers/language_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class CaseHistoryScreen extends StatelessWidget {
@@ -101,9 +102,7 @@ class CaseHistoryScreen extends StatelessWidget {
                     builder: (context, caseFilter, child) {
                       final list = caseFilter.caseList;
 
-                      debugPrint(
-                        'Building ListView with ${list.length} items',
-                      );
+                      debugPrint('Building ListView with ${list.length} items');
 
                       if (list.isEmpty) {
                         return Container(
@@ -130,6 +129,18 @@ class CaseHistoryScreen extends StatelessWidget {
                           itemCount: list.length,
                           itemBuilder: (context, index) => GestureDetector(
                             onTap: () {
+                              final caseType =
+                                  context
+                                      .read<CaseFilterProvider>()
+                                      .caseTypeLocalized[context
+                                      .read<CaseFilterProvider>()
+                                      .selectedFilter]![languageProvider
+                                          .isEnglish
+                                      ? 'eng'
+                                      : 'sin']!;
+
+                              debugPrint(caseType);
+
                               CaseEntity caseEntity = CaseEntity(
                                 caseNumber: list[index].caseNumber,
                                 refereeNo: list[index].refereeNo,
@@ -145,10 +156,7 @@ class CaseHistoryScreen extends StatelessWidget {
                               PopUp(
                                 isNextCase: false,
                                 caseInformation: caseEntity,
-                                caseType:
-                                    context.read<LanguageProvider>().isEnglish
-                                    ? "Pending Case"
-                                    : "ඉදිරි නඩුවක්",
+                                caseType: caseType,
                               ).openPopUp(context);
                             },
                             child: Container(
@@ -191,7 +199,9 @@ class CaseHistoryScreen extends StatelessWidget {
                                       Expanded(
                                         flex: 3,
                                         child: Text(
-                                          '123456',
+                                          list[index].caseNumber != null
+                                              ? list[index].caseNumber!
+                                              : "N/A",
                                           style: TextStyle(
                                             // fontWeight: FontWeight.w500,
                                             fontSize: AppSizes.bodyMedium,
@@ -216,7 +226,9 @@ class CaseHistoryScreen extends StatelessWidget {
                                       Expanded(
                                         flex: 3,
                                         child: Text(
-                                          '123456',
+                                          list[index].name != null
+                                              ? list[index].name!
+                                              : "N/A",
                                           style: TextStyle(
                                             // fontWeight: FontWeight.w500,
                                             fontSize: AppSizes.bodyMedium,
@@ -228,7 +240,11 @@ class CaseHistoryScreen extends StatelessWidget {
                                   Container(
                                     alignment: Alignment.centerRight,
                                     child: Text(
-                                      '2025-10-28',
+                                      list[index].caseDate != null
+                                          ? DateFormat(
+                                              'dd/MM/yyyy',
+                                            ).format(list[index].caseDate!)
+                                          : "N/A",
                                       style: TextStyle(
                                         color: AppColors.secondaryColor,
                                         fontSize: AppSizes.bodySmall,

@@ -1,3 +1,4 @@
+import 'package:audist/common/helpers/app_alert.dart';
 import 'package:audist/common/widgets/custom_button.dart';
 import 'package:audist/common/widgets/custom_input.dart';
 import 'package:audist/core/color.dart';
@@ -161,13 +162,28 @@ class LoginScreen extends StatelessWidget {
                               BlocConsumer<LoginBloc, LoginState>(
                                 listener: (context, state) {
                                   if (state is LoginSuccess) {
-                                    context.read<FetchCaseBloc>().add(RequestFetchCase(uid: state.userId!));
+                                    context.read<FetchCaseBloc>().add(
+                                      RequestFetchCase(uid: state.userId!),
+                                    );
                                     AppNavigator.pushReplacement(
                                       AppRoutes.home,
+                                    );
+                                  }else if(state is LoginEmailSended){
+                                    AppAlert.show(
+                                      context,
+                                      type: AlertType.error,
+                                      title: "Verify your email",
+                                      description: state.message,
                                     );
                                   } else if (state is LoginFailed) {
                                     debugPrint(
                                       'Something else happened: ${state.message}',
+                                    );
+                                    AppAlert.show(
+                                      context,
+                                      type: AlertType.error,
+                                      title: "Login Failed",
+                                      description: state.message,
                                     );
                                   }
                                 },

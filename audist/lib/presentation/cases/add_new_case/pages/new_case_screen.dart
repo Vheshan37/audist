@@ -6,9 +6,13 @@ import 'package:audist/common/widgets/custom_date_picker.dart';
 import 'package:audist/common/widgets/custom_input.dart';
 import 'package:audist/common/widgets/drawer.dart';
 import 'package:audist/core/color.dart';
+import 'package:audist/core/navigation/app_navigator.dart';
+import 'package:audist/core/navigation/app_routes.dart';
 import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
 import 'package:audist/presentation/cases/add_new_case/blocs/add_case/add_case_bloc.dart';
+import 'package:audist/presentation/home/blocs/allcase/all_case_bloc.dart';
+import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
 import 'package:audist/providers/common_data_provider.dart';
 import 'package:audist/providers/image_picker_provider.dart';
 import 'package:audist/providers/language_provider.dart';
@@ -205,6 +209,7 @@ class _NewCaseScreenState extends State<NewCaseScreen> {
         BlocConsumer<AddCaseBloc, AddCaseState>(
           listener: (context, state) {
             if (state is AddCaseLoaded) {
+              debugPrint("New Case Added Successful");
               AppAlert.show(
                 context,
                 type: AlertType.success,
@@ -212,8 +217,34 @@ class _NewCaseScreenState extends State<NewCaseScreen> {
                 description:
                     "Your new case has been added and is now visible in the case list.",
               );
-            }
-            if (state is AddCaseFailed) {
+              context.read<AllCaseBloc>().add(
+                RequestAllCase(uid: context.read<CommonDataProvider>().uid!),
+              );
+              context.read<FetchCaseBloc>().add(
+                RequestFetchCase(uid: context.read<CommonDataProvider>().uid!),
+              );
+
+              // * refresh the page after successfully adding new case
+
+              // Clear all input fields
+              _formKey.currentState?.reset();
+              caseIdController.clear();
+              caseNumberController.clear();
+              nameController.clear();
+              nicController.clear();
+              organizationController.clear();
+              valueController.clear();
+              nextHearingDateController.clear();
+
+              // Clear image selection
+              final imageProvider = context.read<ImagePickerProvider>();
+              context.read<ImagePickerProvider>().clearFirstImage();
+
+              AppNavigator.pushReplacement(AppRoutes.home);
+              AppNavigator.push(AppRoutes.nextCase);
+
+            } else if (state is AddCaseFailed) {
+              debugPrint("New Case Added Failed");
               AppAlert.show(
                 context,
                 type: AlertType.error,
@@ -221,6 +252,8 @@ class _NewCaseScreenState extends State<NewCaseScreen> {
                 description:
                     "Something went wrong while saving your case. Please try again.",
               );
+            } else {
+              debugPrint("Something else happened");
             }
           },
           builder: (context, state) {
@@ -263,9 +296,7 @@ class _NewCaseScreenState extends State<NewCaseScreen> {
                 // Dynamically sized image
                 Center(
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: maxWidth,
-                    ),
+                    constraints: BoxConstraints(maxWidth: maxWidth),
                     child: FittedBox(
                       fit: BoxFit.contain, // ensures no overflow
                       child: image,

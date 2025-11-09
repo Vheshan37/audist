@@ -26,7 +26,6 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.microtask(() {
       context.read<AuthorizationBloc>().add(RequestAuthorization());
     });
-    _goToNextPage();
   }
 
   @override
@@ -137,10 +136,5 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
       ),
     );
-  }
-
-  void _goToNextPage() async {
-    // await Future.delayed(const Duration(seconds: 3));
-    // AppNavigator.pushReplacement(AppRoutes.languageChooser);
   }
 }
