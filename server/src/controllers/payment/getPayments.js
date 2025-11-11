@@ -108,6 +108,9 @@ const addPayment = async (req, res) => {
       where: {
         case_number,
         user_id: userID,
+        case_status: {
+          is: { status: "ongoing" },
+        },
       },
       include: {
         cash_collection: true,
@@ -117,7 +120,7 @@ const addPayment = async (req, res) => {
 
     if (!existingCase) {
       return res.status(404).json({
-        error: "Case not found or does not belong to the given user.",
+        error: "Ongoing case not found or does not belong to the given user.",
       });
     }
 
