@@ -23,3 +23,9 @@ class LoginFailed extends LoginState {
 
   LoginFailed({required this.message});
 }
+
+class LoginEmailSended extends LoginState {
+  final String message;
+
+  LoginEmailSended({required this.message});
+}

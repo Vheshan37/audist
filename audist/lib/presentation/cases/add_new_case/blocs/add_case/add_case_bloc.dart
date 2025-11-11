@@ -41,7 +41,7 @@ class AddCaseBloc extends Bloc<AddCaseEvent, AddCaseState> {
           }
         },
         (data) {
-          AddCaseLoaded();
+          emit(AddCaseLoaded());
         },
       );
 

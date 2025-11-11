@@ -285,7 +285,17 @@ const updateCase = async (req, res) => {
         });
       }
 
-      let caseStatusId = null;
+      await prisma.cases.update({
+        where: {
+          case_number: caseID,
+        },
+        data: {
+          case_date: nextCaseDateObj,
+        },
+      });
+    }
+
+     let caseStatusId = null;
 
       // Determine case status based on other fields
       if (other && other.withdraw) {
@@ -325,7 +335,6 @@ const updateCase = async (req, res) => {
           case_number: caseID,
         },
         data: {
-          case_date: nextCaseDateObj,
           case_status_id: caseStatusId,
         },
       });
@@ -339,7 +348,6 @@ const updateCase = async (req, res) => {
           data: { phase: 3 },
         });
       }
-    }
 
     // Handle case information (update or create)
     const searchCaseInfo = await prisma.case_information.findFirst({
@@ -651,6 +659,7 @@ const getAllCasesByStatus = async (req, res) => {
         case_status: {
           select: { status: true },
         },
+        case_information: true,
       },
       orderBy: {
         case_date: "desc",
@@ -701,7 +710,7 @@ const allCaseDetails = async (req, res) => {
           include: {
             case_person: {
               include: {
-                 case_person_status_case_person_person_1Tocase_person_status: true,
+                case_person_status_case_person_person_1Tocase_person_status: true,
                 case_person_status_case_person_person_2Tocase_person_status: true,
                 case_person_status_case_person_person_3Tocase_person_status: true,
               }
@@ -754,11 +763,11 @@ const allCaseDetails = async (req, res) => {
 
       information: info
         ? {
-            phase: info.phase,
-            settlementFee: info.settlement_fee,
-            nextSettlementDate: info.next_settlment_date,
-            image: info.image_path
-          }
+          phase: info.phase,
+          settlementFee: info.settlement_fee,
+          nextSettlementDate: info.next_settlment_date,
+          image: info.image_path
+        }
         : null,
 
       payments: caseDetail.cash_collection.map((p) => ({

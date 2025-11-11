@@ -32,6 +32,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
               email: response.email,
             ),
           );
+        }else if(response.statusCode==403){
+          emit(LoginEmailSended(message: response.message));
         } else {
           emit(LoginFailed(message: response.message));
         }

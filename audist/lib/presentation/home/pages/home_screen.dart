@@ -1,3 +1,4 @@
+import 'package:audist/common/helpers/app_alert.dart';
 import 'package:audist/common/widgets/custom_background.dart';
 import 'package:audist/core/color.dart';
 import 'package:audist/core/color.dart';
@@ -77,9 +78,7 @@ class HomeScreen extends StatelessWidget {
                           context.read<CaseFilterProvider>().saveAllCasesObject(
                             state.allCaseModel,
                           );
-                          debugPrint(
-                            'All cases synced to CaseFilterProvider',
-                          );
+                          debugPrint('All cases synced to CaseFilterProvider');
                         }
                       },
                       child: _mainContent(context),
@@ -192,6 +191,8 @@ class HomeScreen extends StatelessWidget {
         ),
 
         SizedBox(height: AppSizes.spacingMedium),
+
+        // _testAlert(context),
 
         // * home middle box
         Container(
@@ -377,6 +378,57 @@ class HomeScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _testAlert(BuildContext context) {
+    return Column(
+      children: [
+        TextButton(
+          onPressed: () {
+            AppAlert.show(
+              context,
+              type: AlertType.error,
+              title: "Error",
+              description: "Alert Description for Error",
+            );
+          },
+          child: Text('Error'),
+        ),
+        TextButton(
+          onPressed: () {
+            AppAlert.show(
+              context,
+              type: AlertType.warning,
+              title: "Warning",
+              description: "Alert Description for Warning",
+            );
+          },
+          child: Text('Warning'),
+        ),
+        TextButton(
+          onPressed: () {
+            AppAlert.show(
+              context,
+              type: AlertType.info,
+              title: "Info",
+              description: "Alert Description for Info",
+            );
+          },
+          child: Text('Info'),
+        ),
+        TextButton(
+          onPressed: () {
+            AppAlert.show(
+              context,
+              type: AlertType.success,
+              title: "Success",
+              description: "Alert Description for Success",
+            );
+          },
+          child: Text('Success'),
         ),
       ],
     );
