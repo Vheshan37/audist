@@ -17,6 +17,7 @@ import 'package:audist/providers/case_filter_provider.dart';
 import 'package:audist/providers/language_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -94,6 +95,11 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _mainContent(BuildContext context) {
+    DateTime now = DateTime.now();
+
+    String dayNumber = DateFormat('dd').format(now); // e.g., 17
+    String weekDay = DateFormat('EEEE').format(now); // e.g., Wednesday
+    String monthYear = DateFormat('MMMM yyyy').format(now); // e.g., August 2025
     return Column(
       children: [
         // * home header box
@@ -153,7 +159,7 @@ class HomeScreen extends StatelessWidget {
                         spacing: AppSizes.spacingMedium,
                         children: [
                           Text(
-                            '17',
+                            dayNumber,
                             style: TextStyle(
                               fontSize: 48,
                               fontWeight: FontWeight.w900,
@@ -164,14 +170,14 @@ class HomeScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Wednesday',
+                                weekDay,
                                 style: TextStyle(
                                   color: AppColors.brandDark,
                                   fontSize: AppSizes.bodyLarge,
                                 ),
                               ),
                               Text(
-                                'August  2025',
+                                monthYear,
                                 style: TextStyle(
                                   color: AppColors.brandDark,
                                   fontSize: AppSizes.bodySmall,

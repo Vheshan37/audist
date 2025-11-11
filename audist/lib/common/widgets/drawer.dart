@@ -1,6 +1,7 @@
 import 'package:audist/core/color.dart';
 import 'package:audist/core/default_data.dart';
 import 'package:audist/core/navigation/app_navigator.dart';
+import 'package:audist/core/navigation/app_routes.dart';
 import 'package:audist/core/sizes.dart';
 import 'package:flutter/material.dart';
 
@@ -163,6 +164,7 @@ class CustomDrawer extends StatelessWidget {
       hoverColor: AppColors.brandAccent.withOpacity(0.1),
       onTap: () {
         Navigator.pop(context);
+        AppNavigator.pushReplacement(AppRoutes.home);
         AppNavigator.push(item['route']);
       },
     );
