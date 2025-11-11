@@ -217,9 +217,9 @@ const addCase = async (req, res) => {
   }
 
   // Check NIC length (example for SL NIC)
-  if (nic.length < 10 || nic.length > 12) {
-    return res.status(400).json({ error: "Invalid NIC number format." });
-  }
+  // if (nic.length < 10 || nic.length > 12) {
+  //   return res.status(400).json({ error: "Invalid NIC number format." });
+  // }
 
   try {
     // 🔍 Check for duplicate case number
@@ -704,7 +704,7 @@ const getAllCasesByStatus = async (req, res) => {
       if (status === "pending") pending.push(caseItem);
       else if (status === "ongoing") ongoing.push(caseItem);
       else if (status === "complete") complete.push(caseItem);
-      else if (status === "testimony") testimony.push(caseItem);
+      else if (status === "hold") testimony.push(caseItem);
     });
 
     // Send grouped response
