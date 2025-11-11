@@ -651,6 +651,7 @@ const getAllCasesByStatus = async (req, res) => {
         case_status: {
           select: { status: true },
         },
+        case_information: true,
       },
       orderBy: {
         case_date: "desc",
@@ -701,7 +702,7 @@ const allCaseDetails = async (req, res) => {
           include: {
             case_person: {
               include: {
-                 case_person_status_case_person_person_1Tocase_person_status: true,
+                case_person_status_case_person_person_1Tocase_person_status: true,
                 case_person_status_case_person_person_2Tocase_person_status: true,
                 case_person_status_case_person_person_3Tocase_person_status: true,
               }
@@ -754,11 +755,11 @@ const allCaseDetails = async (req, res) => {
 
       information: info
         ? {
-            phase: info.phase,
-            settlementFee: info.settlement_fee,
-            nextSettlementDate: info.next_settlment_date,
-            image: info.image_path
-          }
+          phase: info.phase,
+          settlementFee: info.settlement_fee,
+          nextSettlementDate: info.next_settlment_date,
+          image: info.image_path
+        }
         : null,
 
       payments: caseDetail.cash_collection.map((p) => ({
