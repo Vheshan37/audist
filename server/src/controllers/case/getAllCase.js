@@ -452,13 +452,13 @@ const updateCase = async (req, res) => {
 
       // Validate person statuses
       const status1 = await prisma.case_person_status.findFirst({
-        where: { status: respondent.person1 },
+        where: { status: respondent.person1.toLowerCase() },
       });
       const status2 = await prisma.case_person_status.findFirst({
-        where: { status: respondent.person2 },
+        where: { status: respondent.person2.toLowerCase() },
       });
       const status3 = await prisma.case_person_status.findFirst({
-        where: { status: respondent.person3 },
+        where: { status: respondent.person3.toLowerCase() },
       });
 
       if (!status1 || !status2 || !status3) {
