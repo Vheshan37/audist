@@ -6,76 +6,80 @@ const prisma = new PrismaClient();
 
 
 const caseWithCaseNumb = async (req, res) => {
-    const { caseNumb, userID , includePayments } = req.body;
-    // const includePayments = req.query.includePayments === "true";
+  const { caseNumb, userID, includePayments } = req.body;
+  // const includePayments = req.query.includePayments === "true";
 
-    if (!caseNumb || caseNumb.trim() === "") {
-        return res.status(400).json({ error: "Case number is required" });
+  if (!caseNumb || caseNumb.trim() === "") {
+    return res.status(400).json({ error: "Case number is required" });
+  }
+
+  try {
+    const caseWithCaseNumb = await prisma.cases.findFirst({
+      where: {
+        case_number: caseNumb,
+        user_id: userID,
+        case_status: {
+          is: {
+            status: {
+              not: "pending", // ✅ exclude pending cases
+            },
+          },
+        },
+      },
+      select: {
+        case_number: true,
+        referee_no: true,
+        name: true,
+        organization: true,
+        value: true,
+        user: {
+          include: {
+            division: true,
+          },
+        },
+        case_status: {
+          select: { status: true },
+        },
+        // Only include cash_collection when needed
+        ...(includePayments && {
+          cash_collection: true,
+        }),
+      },
+    });
+
+    if (!caseWithCaseNumb) {
+      return res.status(404).json({ message: "No case found with that number" });
     }
 
-    try {
-        const caseWithCaseNumb = await prisma.cases.findFirst({
-            where: {
-                case_number: caseNumb,
-                user_id: userID,
-                case_status: {
-                    is: { status: "Ongoing" },
-                },
-            },
-            select: {
-                case_number: true,
-                referee_no: true,
-                name: true,
-                organization: true,
-                value: true,
-                user: {
-                    include: {
-                        division: true,
-                    },
-                },
-                case_status: {
-                    select: { status: true },
-                },
-                // Only include cash_collection when needed
-                ...(includePayments && {
-                    cash_collection: true,
-                }),
-            },
-        });
+    let totalPaid = 0;
+    let remaining = caseWithCaseNumb.value;
 
-        if (!caseWithCaseNumb) {
-            return res.status(404).json({ message: "No case found with that number" });
-        }
-
-        let totalPaid = 0;
-        let remaining = caseWithCaseNumb.value;
-
-        // Calculate payments only if included
-        if (includePayments && caseWithCaseNumb.cash_collection) {
-            totalPaid = caseWithCaseNumb.cash_collection.reduce(
-                (sum, record) => sum + record.payment,
-                0
-            );
-            remaining = caseWithCaseNumb.value - totalPaid;
-        }
-
-        // Build response dynamically
-        const responseData = {
-            ...caseWithCaseNumb,
-            ...(includePayments && {
-                total_paid: totalPaid,
-                remaining,
-            }),
-        };
-
-        res.status(200).json({ case: responseData });
-
-
-
-    } catch (err) {
-        console.error("Error fetching case by number:", err);
-        res.status(500).json({ error: err.message });
+    // Calculate payments only if included
+    if (includePayments && caseWithCaseNumb.cash_collection) {
+      totalPaid = caseWithCaseNumb.cash_collection.reduce(
+        (sum, record) => sum + record.payment,
+        0
+      );
+      remaining = caseWithCaseNumb.value - totalPaid;
     }
+
+    // Build response dynamically
+    const responseData = {
+      ...caseWithCaseNumb,
+      ...(includePayments && {
+        total_paid: totalPaid,
+        remaining,
+      }),
+    };
+
+    res.status(200).json({ case: responseData });
+
+
+
+  } catch (err) {
+    console.error("Error fetching case by number:", err);
+    res.status(500).json({ error: err.message });
+  }
 };
 
 
@@ -91,19 +95,23 @@ const addPayment = async (req, res) => {
   } = req.body;
 
   // 🧾 Validate required fields
-  if (!case_number || !payment || !payment_date || !next_payment_date || !userID) {
+  if (!case_number || !payment || !payment_date || !userID) {
     return res.status(400).json({
       error:
-        "case_number, payment, payment_date, next_payment_date, and userID are required.",
+        "case_number, payment, payment_date, and userID are required.",
     });
   }
 
   try {
-    // 🔍 1️⃣ Validate that the case_number belongs to the given user_id
+    // 🔍 1️⃣ Check that case exists and belongs to the given user
     const existingCase = await prisma.cases.findFirst({
       where: {
-        case_number: case_number,
+        case_number,
         user_id: userID,
+      },
+      include: {
+        cash_collection: true,
+        case_status: true,
       },
     });
 
@@ -113,7 +121,7 @@ const addPayment = async (req, res) => {
       });
     }
 
-    // 💰 2️⃣ Add new payment record
+    // 💰 2️⃣ Add the new payment
     const newPayment = await prisma.cash_collection.create({
       data: {
         case_number,
@@ -123,17 +131,45 @@ const addPayment = async (req, res) => {
       },
     });
 
-    // 📅 3️⃣ Update the next settlement date in related case_information
-    const updatedCaseInfo = await prisma.case_information.updateMany({
+    // 📊 3️⃣ Calculate total paid after this new payment
+    const totalPaid =
+      existingCase.cash_collection.reduce(
+        (sum, record) => sum + record.payment,
+        0
+      ) + parseFloat(payment);
+
+    const remaining = existingCase.value - totalPaid;
+
+    // 📅 4️⃣ Update the next settlement date
+    await prisma.case_information.updateMany({
       where: { cases_case_number: case_number },
       data: { next_settlment_date: new Date(next_payment_date) },
     });
 
-    // ✅ 4️⃣ Respond with success
+    // 🔄 5️⃣ Update case status if fully paid
+    if (remaining <= 0) {
+      const completedStatus = await prisma.case_status.findFirst({
+        where: { status: "complete" },
+      });
+
+      if (completedStatus) {
+        await prisma.cases.update({
+          where: { case_number },
+          data: { case_status_id: completedStatus.id },
+        });
+      }
+    }
+
+    // ✅ 6️⃣ Respond with success info
     res.status(200).json({
-      message: "Payment added and next settlement date updated successfully.",
+      message:
+        remaining <= 0
+          ? "Payment added successfully. Case marked as Completed."
+          : "Payment added successfully and next settlement date updated.",
       payment: newPayment,
-      case_update: updatedCaseInfo,
+      total_paid: totalPaid,
+      remaining: remaining > 0 ? remaining : 0,
+      case_status: remaining <= 0 ? "complete" : "ongoing",
     });
   } catch (err) {
     console.error("Error adding payment:", err);
@@ -143,4 +179,5 @@ const addPayment = async (req, res) => {
 
 
 
-module.exports = { caseWithCaseNumb , addPayment };
+
+module.exports = { caseWithCaseNumb, addPayment };
