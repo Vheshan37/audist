@@ -124,7 +124,6 @@ const caseswithDate = async (req, res) => {
       where: {
         AND: [
           { user_id: userID },
-          { case_status: { status: "Pending" } },
           { case_date: selectedDate },
         ],
       },
@@ -137,6 +136,32 @@ const caseswithDate = async (req, res) => {
         case_status: true,
       },
     });
+
+      // Initialize empty arrays
+    const pending = [];
+    const ongoing = [];
+    const complete = [];
+    const testimony = [];
+
+    // Group cases by status
+    casesWithDate.forEach((caseItem) => {
+      const status = caseItem.case_status.status.toLowerCase();
+
+      if (status === "pending") pending.push(caseItem);
+      else if (status === "ongoing") ongoing.push(caseItem);
+      else if (status === "complete") complete.push(caseItem);
+      else if (status === "hold") testimony.push(caseItem);
+    });
+
+    // Send grouped response
+    res.status(200).json({
+      pending,
+      ongoing,
+      complete,
+      testimony,
+    });
+
+    
     res.json({ casesWithDate }).status(200);
   }
 };
