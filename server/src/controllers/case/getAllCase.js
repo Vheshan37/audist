@@ -285,7 +285,17 @@ const updateCase = async (req, res) => {
         });
       }
 
-      let caseStatusId = null;
+      await prisma.cases.update({
+        where: {
+          case_number: caseID,
+        },
+        data: {
+          case_date: nextCaseDateObj,
+        },
+      });
+    }
+
+     let caseStatusId = null;
 
       // Determine case status based on other fields
       if (other && other.withdraw) {
@@ -325,7 +335,6 @@ const updateCase = async (req, res) => {
           case_number: caseID,
         },
         data: {
-          case_date: nextCaseDateObj,
           case_status_id: caseStatusId,
         },
       });
@@ -339,7 +348,6 @@ const updateCase = async (req, res) => {
           data: { phase: 3 },
         });
       }
-    }
 
     // Handle case information (update or create)
     const searchCaseInfo = await prisma.case_information.findFirst({
