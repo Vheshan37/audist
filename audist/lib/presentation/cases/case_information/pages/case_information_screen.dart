@@ -389,7 +389,7 @@ class CaseInformationScreen extends StatelessWidget {
         Row(
           children: [
             Expanded(flex: 2, child: Text(Strings.caseInformation.value)),
-            Expanded(flex: 3, child: Text(caseInformation.value!)),
+            Expanded(flex: 3, child: Text(caseInformation.value!.toString())),
           ],
         ),
       ],

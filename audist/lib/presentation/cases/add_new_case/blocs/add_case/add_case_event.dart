@@ -8,7 +8,7 @@ class RequestAddCaseEvent extends AddCaseEvent {
   final String name;
   final String nic;
   final String organization;
-  final String value;
+  final double value;
   final String date;
   final String userId;
   final String image;

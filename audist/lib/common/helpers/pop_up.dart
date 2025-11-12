@@ -146,7 +146,7 @@ class PopUp {
                   Expanded(
                     flex: 3,
                     child: Row(
-                      children: [Text(': '), Text(caseInformation!.value!)],
+                      children: [Text(': '), Text(caseInformation!.value!.toString())],
                     ),
                   ),
                 ],

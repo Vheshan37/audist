@@ -62,7 +62,7 @@ class CaseObject {
   final String? refereeNo;
   final String? name;
   final String? organization;
-  final String? value;
+  final double? value;
   final DateTime? caseDate;
   final String? image;
   final String? nic;
@@ -75,7 +75,9 @@ class CaseObject {
       refereeNo: json["referee_no"],
       name: json["name"],
       organization: json["organization"],
-      value: json["value"],
+      value: (json["value"] is int)
+          ? (json["value"] as int).toDouble()
+          : (json["value"] as double?),
       caseDate: DateTime.tryParse(json["case_date"] ?? ""),
       image: json["image"],
       nic: json["nic"],

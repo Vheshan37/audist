@@ -15,7 +15,7 @@ class AddNewCaseRequestModel {
   final String? caseNumb;
   final String? name;
   final String? organization;
-  final String? value;
+  final double? value;
   final String? caseDate;
   final String? image;
   final String? nic;

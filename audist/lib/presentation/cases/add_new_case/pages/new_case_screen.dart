@@ -242,7 +242,6 @@ class _NewCaseScreenState extends State<NewCaseScreen> {
 
               AppNavigator.pushReplacement(AppRoutes.home);
               AppNavigator.push(AppRoutes.nextCase);
-
             } else if (state is AddCaseFailed) {
               debugPrint("New Case Added Failed");
               AppAlert.show(
@@ -363,7 +362,7 @@ class _NewCaseScreenState extends State<NewCaseScreen> {
               name: nameController.text,
               nic: nicController.text,
               organization: organizationController.text,
-              value: valueController.text,
+              value: double.tryParse(valueController.text) ?? 0.0,
               date: formattedDate,
               userId: context.read<CommonDataProvider>().uid!,
               image: "",
