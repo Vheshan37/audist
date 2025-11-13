@@ -810,6 +810,78 @@ const allCaseDetails = async (req, res) => {
   }
 };
 
+const getAllCasesByDivision = async (req, res) => { //use the admin panel
+  try {
+    const divisionID = Number(req.body.divisionID);
+
+    if (!divisionID) {
+      return res.status(400).json({ error: "Division ID is required" });
+    }
+
+    // 🔍 Fetch all cases that belong to this division
+    const allCases = await prisma.cases.findMany({
+      where: {
+        user: {
+          division_id: divisionID,
+        },
+      },
+      select: {
+        case_number: true,
+        referee_no: true,
+        name: true,
+        organization: true,
+        value: true,
+        case_date: true,
+        image: true,
+        nic: true,
+        user: {
+          select: {
+            name: true,
+            division: true,
+          },
+        },
+        case_status: {
+          select: { status: true },
+        },
+        case_information: true,
+      },
+      orderBy: {
+        case_date: "desc",
+      },
+    });
+
+    // Initialize empty arrays
+    const pending = [];
+    const ongoing = [];
+    const complete = [];
+    const testimony = [];
+
+    // Group cases by status
+    allCases.forEach((caseItem) => {
+      const status = caseItem.case_status.status.toLowerCase();
+
+      if (status === "pending") pending.push(caseItem);
+      else if (status === "ongoing") ongoing.push(caseItem);
+      else if (status === "complete") complete.push(caseItem);
+      else if (status === "hold") testimony.push(caseItem);
+    });
+
+    // Send grouped response
+    res.status(200).json({
+      pending,
+      ongoing,
+      complete,
+      testimony,
+    });
+  } catch (err) {
+    console.error("Error fetching cases:", err);
+    res.status(500).json({
+      error: "Internal Server Error",
+      message: err.message,
+    });
+  }
+};
+
 
 
 module.exports = {
@@ -821,4 +893,5 @@ module.exports = {
   caseDetails,
   getAllCasesByStatus,
   allCaseDetails,
+  getAllCasesByDivision,
 };
