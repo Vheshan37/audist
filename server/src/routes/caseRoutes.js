@@ -1,6 +1,7 @@
 const express = require("express");
   
-const {cases,
+const {
+    cases,
     caseswithDate,
     addCase,
     updateCase,
@@ -8,7 +9,9 @@ const {cases,
     caseDetails ,
     getAllCasesByStatus,
     allCaseDetails,
-    getAllCasesByDivision} = require("../controllers/case/getAllCase");
+    getAllCasesByDivision,
+    getAllDivisions,
+} = require("../controllers/case/getAllCase");
 
 const router = express.Router();
 
@@ -22,5 +25,6 @@ router.put("/updateDate", updatecaseDate);
 router.post("/updateDetails", updateCase);
 router.post("/viewallcases", getAllCasesByStatus);
 router.post("/casesbydivision", getAllCasesByDivision);
+router.get("/divisions", getAllDivisions);
 
 module.exports = router; 
