@@ -886,6 +886,36 @@ const getAllCasesByDivision = async (req, res) => { //use the admin panel
 };
 
 
+const getAllDivisions = async (req, res) => { // use the admin panel for case division filter
+  try {
+    const divisions = await prisma.division.findMany({
+      select: {
+        id: true,
+        division: true,
+      },
+      orderBy: {
+        division: "asc",
+      },
+    });
+
+    if (!divisions || divisions.length === 0) {
+      return res.status(404).json({ message: "No divisions found" });
+    }
+
+    res.status(200).json({
+      message: "Divisions fetched successfully",
+      divisions,
+    });
+  } catch (err) {
+    console.error("Error fetching divisions:", err);
+    res.status(500).json({
+      error: "Internal Server Error",
+      message: err.message,
+    });
+  }
+};
+
+
 
 module.exports = {
   cases,
@@ -897,4 +927,5 @@ module.exports = {
   getAllCasesByStatus,
   allCaseDetails,
   getAllCasesByDivision,
+  getAllDivisions,
 };
