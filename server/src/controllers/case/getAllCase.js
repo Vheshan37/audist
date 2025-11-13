@@ -746,6 +746,9 @@ const allCaseDetails = async (req, res) => {
       }
     });
 
+    console.log("Fetched case detail:", JSON.stringify(caseDetail));
+
+
     if (!caseDetail) {
       return res.status(404).json({ error: "Case not found" });
     }
@@ -774,15 +777,15 @@ const allCaseDetails = async (req, res) => {
       respondent: {
         person1: {
           statusId: person?.person_1,
-          status: person?.person1Status?.status
+          status: person?.case_person_status_case_person_person_1Tocase_person_status?.status
         },
         person2: {
           statusId: person?.person_2,
-          status: person?.person2Status?.status
+          status: person?.case_person_status_case_person_person_2Tocase_person_status?.status
         },
         person3: {
           statusId: person?.person_3,
-          status: person?.person3Status?.status
+          status: person?.case_person_status_case_person_person_3Tocase_person_status?.status
         }
       },
 

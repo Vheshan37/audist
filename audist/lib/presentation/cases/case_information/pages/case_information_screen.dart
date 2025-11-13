@@ -216,6 +216,8 @@ class CaseInformationScreen extends StatelessWidget {
 
   Widget _judgmentSection(BuildContext context) {
     TextEditingController todaysPaymentController = TextEditingController();
+    TextEditingController installmentController = TextEditingController();
+    TextEditingController nextCaseDateController = TextEditingController();
     return Column(
       spacing: AppSizes.spacingSmall,
       children: [
@@ -240,7 +242,7 @@ class CaseInformationScreen extends StatelessWidget {
             Expanded(
               flex: 3,
               child: Custominput(
-                textEditingController: todaysPaymentController,
+                textEditingController: installmentController,
                 name: '',
               ),
             ),
@@ -254,9 +256,9 @@ class CaseInformationScreen extends StatelessWidget {
             ),
             Expanded(
               flex: 3,
-              child: Custominput(
-                textEditingController: todaysPaymentController,
-                name: '',
+              child: CustomDatePicker(
+                textEditingController: nextCaseDateController,
+                name: 'DD/MM/YYYY',
               ),
             ),
           ],
