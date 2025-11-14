@@ -12,6 +12,16 @@ class ImagePickerProvider extends ChangeNotifier {
   File? get firstImage => _firstImage;
   File? get secondImage => _secondImage;
 
+  void setFirstImage(File? file) {
+    _firstImage = file;
+    notifyListeners();
+  }
+
+  void setSecondImage(File? file) {
+    _secondImage = file;
+    notifyListeners();
+  }
+
   // Pick first image (used by one interface)
   Future<void> pickFirstImageFromCamera() async {
     final picked = await _picker.pickImage(source: ImageSource.camera);

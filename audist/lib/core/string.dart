@@ -37,12 +37,15 @@ class Strings {
 
 class CaseInformation {
   String get title => _isEnglish ? "Case Information" : "නඩු විභාග විස්තර";
+  String get popUpTitle => _isEnglish ? "Confirm Case Update" : "නඩු විස්තරය තහවුරු කරන්න";
+
   String get caseNumber => _isEnglish ? "Case Number" : "නඩු අංකය";
   String get id => _isEnglish ? "Referee no" : "තීරක අංකය";
   String get name => _isEnglish ? "Name" : "නම";
   String get organization => _isEnglish ? "Organization" : "සමිතිය";
   String get value => _isEnglish ? "Value" : "වටිනාකම";
   String get respondent => _isEnglish ? "Respondent" : "වගඋත්තරකරු";
+  String get respondents => _isEnglish ? "Respondents" : "වගඋත්තරකරුවන්";
   String get summons => _isEnglish ? "Summons" : "සිතාසි";
   String get newAddress => _isEnglish ? "New Address" : "නව ලිපිනය";
   String get warrant => _isEnglish ? "Warrants" : "වරෙන්තු";

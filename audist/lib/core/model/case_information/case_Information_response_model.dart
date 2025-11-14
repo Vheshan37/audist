@@ -1,5 +1,5 @@
-class CaseInformationResponse {
-  CaseInformationResponse({
+class CaseInformationResponseModel {
+  CaseInformationResponseModel({
     required this.caseInformationResponseCase,
     required this.respondent,
     required this.information,
@@ -11,8 +11,8 @@ class CaseInformationResponse {
   final Information? information;
   final List<Payment> payments;
 
-  factory CaseInformationResponse.fromJson(Map<String, dynamic> json) {
-    return CaseInformationResponse(
+  factory CaseInformationResponseModel.fromJson(Map<String, dynamic> json) {
+    return CaseInformationResponseModel(
       caseInformationResponseCase: json["case"] == null
           ? null
           : Case.fromJson(json["case"]),
