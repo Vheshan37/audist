@@ -11,7 +11,6 @@ class CaseEntity {
     required this.nic,
     required this.userId,
   });
-
   final String? caseNumber;
   final String? refereeNo;
   final String? name;
