@@ -9,12 +9,12 @@ import 'package:audist/common/widgets/custom_input.dart';
 import 'package:audist/common/widgets/drawer.dart';
 import 'package:audist/core/color.dart';
 import 'package:audist/core/model/case_information/case_Information_response_model.dart';
-import 'package:audist/core/model/case_information/case_information_request_model.dart';
+import 'package:audist/core/model/case_information/case_information_request_model.dart'
+    as request_model;
 import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
 import 'package:audist/domain/cases/entities/case_entity.dart';
 import 'package:audist/presentation/cases/case_information/blocs/details/case_information_detail_bloc.dart';
-import 'package:audist/presentation/cases/case_information/blocs/update/case_information_update_bloc.dart';
 import 'package:audist/providers/case_information_checkbox_provider.dart';
 import 'package:audist/providers/common_data_provider.dart';
 import 'package:audist/providers/image_picker_provider.dart';
@@ -60,6 +60,21 @@ class _CaseInformationScreenState extends State<CaseInformationScreen> {
     final CaseInformationResponseModel caseInformation =
         ModalRoute.of(context)!.settings.arguments
             as CaseInformationResponseModel;
+
+    final CaseEntity caseEntity = CaseEntity(
+      caseNumber: caseInformation.caseInformationResponseCase?.caseNumber,
+      refereeNo: caseInformation.caseInformationResponseCase?.refereeNo,
+      name: caseInformation.caseInformationResponseCase?.name,
+      organization: caseInformation.caseInformationResponseCase?.organization,
+      value: double.tryParse(
+        caseInformation.caseInformationResponseCase!.value!.toString(),
+      ),
+      caseDate: caseInformation.caseInformationResponseCase?.date,
+      createdAt: null,
+      image: null,
+      nic: caseInformation.caseInformationResponseCase?.nic,
+      userId: caseInformation.caseInformationResponseCase?.userId,
+    );
 
     return CustomBackground(
       child: Consumer2<LanguageProvider, ImagePickerProvider>(
@@ -232,13 +247,7 @@ class _CaseInformationScreenState extends State<CaseInformationScreen> {
                     child: Column(
                       children: [
                         // * case information
-                        _caseInformations(
-                          context,
-                          CaseEntity.fromJson(
-                            caseInformation.caseInformationResponseCase!
-                                .toJson(),
-                          ),
-                        ),
+                        _caseInformations(context, caseEntity),
 
                         // * space & horizontal divider
                         SizedBox(height: AppSizes.spacingSmall),
@@ -307,10 +316,7 @@ class _CaseInformationScreenState extends State<CaseInformationScreen> {
                         // * action button
                         _actionButton(
                           context,
-                          CaseEntity.fromJson(
-                            caseInformation.caseInformationResponseCase!
-                                .toJson(),
-                          ),
+                          caseEntity,
                           datePickerController,
                           todaysPaymentController,
                           installmentController,
@@ -346,7 +352,7 @@ class _CaseInformationScreenState extends State<CaseInformationScreen> {
         final checkBoxProvider = context
             .read<CaseInformationCheckboxProvider>();
 
-        final respondent = Respondent(
+        final respondent = request_model.Respondent(
           person1: checkBoxProvider.getSelectedType(1),
           person2: checkBoxProvider.getSelectedType(2),
           person3: checkBoxProvider.getSelectedType(3),
@@ -361,13 +367,13 @@ class _CaseInformationScreenState extends State<CaseInformationScreen> {
         } catch (_) {
           parsedNextCaseDate = null;
         }
-        final Judgement judgement = Judgement(
+        final request_model.Judgement judgement = request_model.Judgement(
           settlementFee: int.tryParse(installmentController.text),
           nextSettlementDate: parsedNextCaseDate,
           todayPayment: int.tryParse(todaysPaymentController.text),
         );
 
-        final Other other = Other(
+        final request_model.Other other = request_model.Other(
           withdraw: context.read<CaseInformationCheckboxProvider>().withdraw,
           testimony: context.read<CaseInformationCheckboxProvider>().testimony,
           image: null,
@@ -381,8 +387,8 @@ class _CaseInformationScreenState extends State<CaseInformationScreen> {
 
         debugPrint("parsedNextCaseDate: $parsedNextCaseDate");
 
-        final CaseInformationRequestModel requestModel =
-            CaseInformationRequestModel(
+        final request_model.CaseInformationRequestModel requestModel =
+            request_model.CaseInformationRequestModel(
               userId: context.read<CommonDataProvider>().uid,
               caseId: caseInformation.caseNumber,
               respondent: respondent,
@@ -669,14 +675,14 @@ class _CaseInformationScreenState extends State<CaseInformationScreen> {
         Row(
           children: [
             Expanded(flex: 2, child: Text(Strings.caseInformation.caseNumber)),
-            Expanded(flex: 3, child: Text(caseInformation.caseNumber!)),
+            Expanded(flex: 3, child: Text(caseInformation.caseNumber ?? 'N/A')),
           ],
         ),
         SizedBox(height: AppSizes.spacingSmall),
         Row(
           children: [
             Expanded(flex: 2, child: Text(Strings.caseInformation.id)),
-            Expanded(flex: 3, child: Text(caseInformation.refereeNo!)),
+            Expanded(flex: 3, child: Text(caseInformation.refereeNo ?? 'N/A')),
           ],
         ),
         SizedBox(height: AppSizes.spacingSmall),
@@ -686,21 +692,27 @@ class _CaseInformationScreenState extends State<CaseInformationScreen> {
               flex: 2,
               child: Text(Strings.caseInformation.organization),
             ),
-            Expanded(flex: 3, child: Text(caseInformation.organization!)),
+            Expanded(
+              flex: 3,
+              child: Text(caseInformation.organization ?? 'N/A'),
+            ),
           ],
         ),
         SizedBox(height: AppSizes.spacingSmall),
         Row(
           children: [
             Expanded(flex: 2, child: Text(Strings.caseInformation.name)),
-            Expanded(flex: 3, child: Text(caseInformation.name!)),
+            Expanded(flex: 3, child: Text(caseInformation.name ?? 'N/A')),
           ],
         ),
         SizedBox(height: AppSizes.spacingSmall),
         Row(
           children: [
             Expanded(flex: 2, child: Text(Strings.caseInformation.value)),
-            Expanded(flex: 3, child: Text(caseInformation.value!.toString())),
+            Expanded(
+              flex: 3,
+              child: Text(caseInformation.value?.toString() ?? 'N/A'),
+            ),
           ],
         ),
       ],
