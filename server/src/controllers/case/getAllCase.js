@@ -746,6 +746,9 @@ const allCaseDetails = async (req, res) => {
       }
     });
 
+    console.log("Fetched case detail:", JSON.stringify(caseDetail));
+
+
     if (!caseDetail) {
       return res.status(404).json({ error: "Case not found" });
     }
@@ -774,15 +777,15 @@ const allCaseDetails = async (req, res) => {
       respondent: {
         person1: {
           statusId: person?.person_1,
-          status: person?.person1Status?.status
+          status: person?.case_person_status_case_person_person_1Tocase_person_status?.status
         },
         person2: {
           statusId: person?.person_2,
-          status: person?.person2Status?.status
+          status: person?.case_person_status_case_person_person_2Tocase_person_status?.status
         },
         person3: {
           statusId: person?.person_3,
-          status: person?.person3Status?.status
+          status: person?.case_person_status_case_person_person_3Tocase_person_status?.status
         }
       },
 
@@ -810,6 +813,108 @@ const allCaseDetails = async (req, res) => {
   }
 };
 
+const getAllCasesByDivision = async (req, res) => { //use the admin panel
+  try {
+    const divisionID = Number(req.body.divisionID);
+
+    if (!divisionID) {
+      return res.status(400).json({ error: "Division ID is required" });
+    }
+
+    // 🔍 Fetch all cases that belong to this division
+    const allCases = await prisma.cases.findMany({
+      where: {
+        user: {
+          division_id: divisionID,
+        },
+      },
+      select: {
+        case_number: true,
+        referee_no: true,
+        name: true,
+        organization: true,
+        value: true,
+        case_date: true,
+        image: true,
+        nic: true,
+        user: {
+          select: {
+            name: true,
+            division: true,
+          },
+        },
+        case_status: {
+          select: { status: true },
+        },
+        case_information: true,
+      },
+      orderBy: {
+        case_date: "desc",
+      },
+    });
+
+    // Initialize empty arrays
+    const pending = [];
+    const ongoing = [];
+    const complete = [];
+    const testimony = [];
+
+    // Group cases by status
+    allCases.forEach((caseItem) => {
+      const status = caseItem.case_status.status.toLowerCase();
+
+      if (status === "pending") pending.push(caseItem);
+      else if (status === "ongoing") ongoing.push(caseItem);
+      else if (status === "complete") complete.push(caseItem);
+      else if (status === "hold") testimony.push(caseItem);
+    });
+
+    // Send grouped response
+    res.status(200).json({
+      pending,
+      ongoing,
+      complete,
+      testimony,
+    });
+  } catch (err) {
+    console.error("Error fetching cases:", err);
+    res.status(500).json({
+      error: "Internal Server Error",
+      message: err.message,
+    });
+  }
+};
+
+
+const getAllDivisions = async (req, res) => { // use the admin panel for case division filter
+  try {
+    const divisions = await prisma.division.findMany({
+      select: {
+        id: true,
+        division: true,
+      },
+      orderBy: {
+        division: "asc",
+      },
+    });
+
+    if (!divisions || divisions.length === 0) {
+      return res.status(404).json({ message: "No divisions found" });
+    }
+
+    res.status(200).json({
+      message: "Divisions fetched successfully",
+      divisions,
+    });
+  } catch (err) {
+    console.error("Error fetching divisions:", err);
+    res.status(500).json({
+      error: "Internal Server Error",
+      message: err.message,
+    });
+  }
+};
+
 
 
 module.exports = {
@@ -821,4 +926,6 @@ module.exports = {
   caseDetails,
   getAllCasesByStatus,
   allCaseDetails,
+  getAllCasesByDivision,
+  getAllDivisions,
 };

@@ -4,6 +4,8 @@ import 'package:audist/core/string.dart';
 import 'package:audist/firebase_options.dart';
 import 'package:audist/presentation/auth/login/bloc/login_bloc.dart';
 import 'package:audist/presentation/cases/add_new_case/blocs/add_case/add_case_bloc.dart';
+import 'package:audist/presentation/cases/case_information/blocs/details/case_information_detail_bloc.dart';
+import 'package:audist/presentation/cases/case_information/blocs/update/case_information_update_bloc.dart';
 import 'package:audist/presentation/home/blocs/allcase/all_case_bloc.dart';
 import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
 import 'package:audist/presentation/home/pages/home_screen.dart';
@@ -36,7 +38,7 @@ void main() async {
           create: (context) => CaseInformationCheckboxProvider(),
         ),
         ChangeNotifierProvider(create: (context) => CaseFilterProvider()),
-        ChangeNotifierProvider(create: (context) => CommonDataProvider(),)
+        ChangeNotifierProvider(create: (context) => CommonDataProvider()),
       ],
       child: GestureDetector(
         onLongPress: () {
@@ -48,7 +50,9 @@ void main() async {
             BlocProvider(create: (context) => AuthorizationBloc()),
             BlocProvider(create: (context) => FetchCaseBloc()),
             BlocProvider(create: (context) => AllCaseBloc()),
-            BlocProvider(create: (context) => AddCaseBloc(),)
+            BlocProvider(create: (context) => AddCaseBloc()),
+            BlocProvider(create: (context) => CaseInformationUpdateBloc()),
+            BlocProvider(create: (context) => CaseInformationDetailBloc()),
           ],
           child: const MyApp(),
         ),

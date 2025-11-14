@@ -1,20 +1,29 @@
+import 'package:audist/common/helpers/app_alert.dart';
 import 'package:audist/common/helpers/date_formatter.dart';
 import 'package:audist/common/widgets/custom_button.dart';
 import 'package:audist/common/widgets/custom_date_picker.dart';
 import 'package:audist/core/color.dart';
+import 'package:audist/core/model/case_information/case_information_view_model.dart';
 import 'package:audist/core/navigation/app_navigator.dart';
 import 'package:audist/core/navigation/app_routes.dart';
 import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
 import 'package:audist/domain/cases/entities/case_entity.dart';
+import 'package:audist/presentation/cases/case_information/blocs/details/case_information_detail_bloc.dart';
+import 'package:audist/providers/common_data_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class PopUp {
   TextEditingController datePickerController = TextEditingController();
   final bool isNextCase;
   final String caseType;
   final CaseEntity? caseInformation;
-  PopUp({required this.isNextCase, this.caseInformation, required this.caseType});
+  PopUp({
+    required this.isNextCase,
+    this.caseInformation,
+    required this.caseType,
+  });
 
   void openPopUp(BuildContext context) {
     showDialog(
@@ -146,7 +155,10 @@ class PopUp {
                   Expanded(
                     flex: 3,
                     child: Row(
-                      children: [Text(': '), Text(caseInformation!.value!)],
+                      children: [
+                        Text(': '),
+                        Text(caseInformation!.value!.toString()),
+                      ],
                     ),
                   ),
                 ],
@@ -172,20 +184,63 @@ class PopUp {
                 ),
               SizedBox(height: 10),
               Divider(),
-              CustomButton(
-                content: Text(
-                  Strings.casePopUp.primaryButton,
-                  style: TextStyle(color: AppColors.surfaceLight),
-                ),
-                onPressed: () => {
-                  // close the model
-                  AppNavigator.pop(context),
+              BlocConsumer<
+                CaseInformationDetailBloc,
+                CaseInformationDetailState
+              >(
+                listener: (context, state) {
+                  if (state is CaseInformationDetailFailed) {
+                    AppAlert.show(
+                      context,
+                      type: AlertType.error,
+                      title: "Unable to Load Case Information",
+                      description:
+                          "We couldn’t retrieve the case details. Please check your connection and try again.",
+                    );
+                    AppNavigator.pop(context);
+                  }
 
-                  // navigate to case information register page
-                  AppNavigator.push(
-                    AppRoutes.caseinformation,
-                    arguments: caseInformation,
-                  ),
+                  if (state is CaseInformationDetailSuccess) {
+                    AppAlert.show(
+                      context,
+                      type: AlertType.success,
+                      title: "Case Information Loaded",
+                      description:
+                          "The case details have been successfully retrieved and are ready to review.",
+                    );
+
+                    AppNavigator.pop(context);
+                    AppNavigator.push(
+                      AppRoutes.caseinformation,
+                      arguments: state.response,
+                    );
+                  }
+                },
+                builder: (context, state) {
+                  Widget child = Text(
+                    Strings.casePopUp.primaryButton,
+                    style: TextStyle(color: AppColors.surfaceLight),
+                  );
+
+                  if (state is CaseInformationDetailLoading) {
+                    child = CircularProgressIndicator(
+                      color: AppColors.surfaceLight,
+                    );
+                  }
+
+                  return CustomButton(
+                    content: child,
+                    onPressed: () => {
+                      context.read<CaseInformationDetailBloc>().add(
+                        RequestCaseInformationEvent(
+                          request: CaseInformationViewModel(
+                            caseId: caseInformation!.caseNumber!,
+                            userId: context.read<CommonDataProvider>().uid!,
+                          ),
+                        ),
+                      ),
+                    },
+                  );
                 },
               ),
             ],

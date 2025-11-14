@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:audist/common/helpers/case_information_confirm_popup.dart';
 import 'package:audist/common/widgets/custom_app_bar.dart';
 import 'package:audist/common/widgets/custom_background.dart';
 import 'package:audist/common/widgets/custom_button.dart';
@@ -5,22 +8,58 @@ import 'package:audist/common/widgets/custom_date_picker.dart';
 import 'package:audist/common/widgets/custom_input.dart';
 import 'package:audist/common/widgets/drawer.dart';
 import 'package:audist/core/color.dart';
+import 'package:audist/core/model/case_information/case_Information_response_model.dart';
+import 'package:audist/core/model/case_information/case_information_request_model.dart';
 import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
 import 'package:audist/domain/cases/entities/case_entity.dart';
+import 'package:audist/presentation/cases/case_information/blocs/details/case_information_detail_bloc.dart';
+import 'package:audist/presentation/cases/case_information/blocs/update/case_information_update_bloc.dart';
 import 'package:audist/providers/case_information_checkbox_provider.dart';
+import 'package:audist/providers/common_data_provider.dart';
 import 'package:audist/providers/image_picker_provider.dart';
 import 'package:audist/providers/language_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class CaseInformationScreen extends StatelessWidget {
+class CaseInformationScreen extends StatefulWidget {
   const CaseInformationScreen({super.key});
 
   @override
+  State<CaseInformationScreen> createState() => _CaseInformationScreenState();
+}
+
+class _CaseInformationScreenState extends State<CaseInformationScreen> {
+  late TextEditingController datePickerController;
+  late TextEditingController todaysPaymentController;
+  late TextEditingController installmentController;
+  late TextEditingController nextCaseDateController;
+
+  @override
+  void initState() {
+    super.initState();
+    datePickerController = TextEditingController();
+    todaysPaymentController = TextEditingController();
+    installmentController = TextEditingController();
+    nextCaseDateController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    datePickerController.dispose();
+    todaysPaymentController.dispose();
+    installmentController.dispose();
+    nextCaseDateController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final CaseEntity caseInformation =
-        ModalRoute.of(context)!.settings.arguments as CaseEntity;
+    final CaseInformationResponseModel caseInformation =
+        ModalRoute.of(context)!.settings.arguments
+            as CaseInformationResponseModel;
 
     return CustomBackground(
       child: Consumer2<LanguageProvider, ImagePickerProvider>(
@@ -28,96 +67,345 @@ class CaseInformationScreen extends StatelessWidget {
           backgroundColor: Colors.transparent,
           appBar: CustomAppBar(title: Strings.caseInformation.title),
           drawer: const CustomDrawer(),
-          body: SingleChildScrollView(
-            padding: EdgeInsets.all(AppSizes.paddingMedium),
-            child: Column(
-              children: [
-                // * case information
-                _caseInformations(context, caseInformation),
+          body:
+              BlocConsumer<
+                CaseInformationDetailBloc,
+                CaseInformationDetailState
+              >(
+                listener: (context, state) {
+                  // * Case information loading process
+                  debugPrint("Case information screen bloc consumer");
+                  debugPrint("Case information screen bloc consumer");
+                  debugPrint("Case information screen bloc consumer");
+                  debugPrint("Case information screen bloc consumer");
+                  debugPrint("Case information screen bloc consumer");
+                  debugPrint("Case information screen bloc consumer");
+                  debugPrint("Case information screen bloc consumer");
 
-                // * space & horizontal divider
-                SizedBox(height: AppSizes.spacingSmall),
-                const Divider(),
+                  if (state is CaseInformationDetailSuccess) {
+                    debugPrint(
+                      "Case information loaded to case information screen",
+                    );
+                    debugPrint(
+                      "Case information loaded to case information screen",
+                    );
+                    debugPrint(
+                      "Case information loaded to case information screen",
+                    );
+                    debugPrint(
+                      "Case information loaded to case information screen",
+                    );
+                    debugPrint(
+                      "Case information loaded to case information screen",
+                    );
+                    debugPrint(
+                      "Case information loaded to case information screen",
+                    );
+                    debugPrint(
+                      "Case information loaded to case information screen",
+                    );
+                    debugPrint(
+                      "Case information loaded to case information screen",
+                    );
+                    debugPrint(
+                      "Case information loaded to case information screen",
+                    );
+                    debugPrint(
+                      "Case information loaded to case information screen",
+                    );
+                    debugPrint(
+                      "Case information loaded to case information screen",
+                    );
+                    debugPrint(
+                      "Case information loaded to case information screen",
+                    );
+                    debugPrint(
+                      "Case information loaded to case information screen",
+                    );
+                    final data = state.response;
 
-                // * check boxes
-                _caseStatuses(context),
+                    // --- FILL TEXT FIELDS ---
+                    todaysPaymentController.text =
+                        data.information?.settlementFee?.toString() ?? "";
 
-                SizedBox(height: AppSizes.spacingSmall),
+                    installmentController.text =
+                        data.information?.settlementFee?.toString() ?? "";
 
-                // * next case date picker
-                _nextCaseDatePicker(context),
+                    nextCaseDateController.text =
+                        data.information?.nextSettlementDate != null
+                        ? DateFormat(
+                            'dd/MM/yyyy',
+                          ).format(data.information!.nextSettlementDate!)
+                        : "";
 
-                SizedBox(height: AppSizes.spacingLarge),
+                    datePickerController.text =
+                        data.information?.nextSettlementDate != null
+                        ? DateFormat(
+                            'dd/MM/yyyy',
+                          ).format(data.information!.nextSettlementDate!)
+                        : "";
 
-                Row(
-                  spacing: AppSizes.spacingSmall,
-                  children: [
-                    Text(
-                      Strings.caseInformation.judgement,
-                      style: TextStyle(
-                        fontSize: AppSizes.bodyLarge,
-                        fontWeight: FontWeight.w500,
+                    // --- CHECKBOXES / STATUSES ---
+                    final checkboxProvider = context
+                        .read<CaseInformationCheckboxProvider>();
+
+                    checkboxProvider.setStatus(
+                      1,
+                      data.respondent?.person1?.status,
+                    );
+
+                    checkboxProvider.setStatus(
+                      2,
+                      data.respondent?.person2?.status,
+                    );
+
+                    checkboxProvider.setStatus(
+                      3,
+                      data.respondent?.person3?.status,
+                    );
+
+                    checkboxProvider.setWithdraw(
+                      data.information?.phase == "withdraw",
+                    );
+
+                    checkboxProvider.setTestimony(
+                      data.information?.phase == "testimony",
+                    );
+
+                    // --- IMAGE ---
+                    if (data.information?.image != null) {
+                      context.read<ImagePickerProvider>().setSecondImage(
+                        File(data.information!.image!),
+                      );
+                    }
+                  }
+
+                  debugPrint(
+                    "Case information not loaded to case information screen",
+                  );
+                  debugPrint(
+                    "Case information not loaded to case information screen",
+                  );
+                  debugPrint(
+                    "Case information not loaded to case information screen",
+                  );
+                  debugPrint(
+                    "Case information not loaded to case information screen",
+                  );
+                  debugPrint(
+                    "Case information not loaded to case information screen",
+                  );
+                  debugPrint(
+                    "Case information not loaded to case information screen",
+                  );
+                  debugPrint(
+                    "Case information not loaded to case information screen",
+                  );
+                  debugPrint(
+                    "Case information not loaded to case information screen",
+                  );
+                  debugPrint(
+                    "Case information not loaded to case information screen",
+                  );
+                  debugPrint(
+                    "Case information not loaded to case information screen",
+                  );
+                  debugPrint(
+                    "Case information not loaded to case information screen",
+                  );
+                  debugPrint(
+                    "Case information not loaded to case information screen",
+                  );
+
+                  // * Case information loading process
+                },
+                builder: (context, state) {
+                  if (state is CaseInformationDetailLoading) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.brandDark,
                       ),
+                    );
+                  }
+                  return SingleChildScrollView(
+                    padding: EdgeInsets.all(AppSizes.paddingMedium),
+                    child: Column(
+                      children: [
+                        // * case information
+                        _caseInformations(
+                          context,
+                          CaseEntity.fromJson(
+                            caseInformation.caseInformationResponseCase!
+                                .toJson(),
+                          ),
+                        ),
+
+                        // * space & horizontal divider
+                        SizedBox(height: AppSizes.spacingSmall),
+                        const Divider(),
+
+                        // * check boxes
+                        _caseStatuses(context),
+
+                        SizedBox(height: AppSizes.spacingSmall),
+
+                        // * next case date picker
+                        _nextCaseDatePicker(context, datePickerController),
+
+                        SizedBox(height: AppSizes.spacingLarge),
+
+                        Row(
+                          spacing: AppSizes.spacingSmall,
+                          children: [
+                            Text(
+                              Strings.caseInformation.judgement,
+                              style: TextStyle(
+                                fontSize: AppSizes.bodyLarge,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Expanded(child: const Divider()),
+                          ],
+                        ),
+
+                        SizedBox(height: AppSizes.spacingSmall),
+                        // * judgment section
+                        _judgmentSection(
+                          context,
+                          todaysPaymentController,
+                          installmentController,
+                          nextCaseDateController,
+                        ),
+
+                        // Add some bottom padding for better scrolling
+                        SizedBox(height: AppSizes.spacingLarge),
+
+                        Row(
+                          spacing: AppSizes.spacingSmall,
+                          children: [
+                            Text(
+                              Strings.caseInformation.otherInformation,
+                              style: TextStyle(
+                                fontSize: AppSizes.bodyLarge,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Expanded(child: const Divider()),
+                          ],
+                        ),
+
+                        // * other information section
+                        _otherInformation(context),
+
+                        SizedBox(height: AppSizes.spacingMedium),
+
+                        // * image picker section
+                        _imagePickerSection(context, imageProvider),
+
+                        SizedBox(height: AppSizes.spacingMedium),
+
+                        // * action button
+                        _actionButton(
+                          context,
+                          CaseEntity.fromJson(
+                            caseInformation.caseInformationResponseCase!
+                                .toJson(),
+                          ),
+                          datePickerController,
+                          todaysPaymentController,
+                          installmentController,
+                          nextCaseDateController,
+                        ),
+                      ],
                     ),
-                    Expanded(child: const Divider()),
-                  ],
-                ),
-
-                SizedBox(height: AppSizes.spacingSmall),
-                // * judgment section
-                _judgmentSection(context),
-
-                // Add some bottom padding for better scrolling
-                SizedBox(height: AppSizes.spacingLarge),
-
-                Row(
-                  spacing: AppSizes.spacingSmall,
-                  children: [
-                    Text(
-                      Strings.caseInformation.otherInformation,
-                      style: TextStyle(
-                        fontSize: AppSizes.bodyLarge,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Expanded(child: const Divider()),
-                  ],
-                ),
-
-                // * other information section
-                _otherInformation(context),
-
-                SizedBox(height: AppSizes.spacingMedium),
-
-                // * image picker section
-                _imagePickerSection(context, imageProvider),
-
-                SizedBox(height: AppSizes.spacingMedium),
-
-                // * action button
-                _actionButton(context),
-              ],
-            ),
-          ),
+                  );
+                },
+              ),
         ),
       ),
     );
   }
 
-  Widget _actionButton(BuildContext context) {
+  Widget _actionButton(
+    BuildContext context,
+    CaseEntity caseInformation,
+    TextEditingController newDate,
+    TextEditingController todaysPaymentController,
+    TextEditingController installmentController,
+    TextEditingController nextCaseDateController,
+  ) {
+    debugPrint("New Date: ${newDate.text}");
+    debugPrint("Next Case Date: ${nextCaseDateController.text}");
+
     return CustomButton(
       content: Text(
         Strings.caseInformation.registerButtonText,
         style: TextStyle(color: AppColors.surfaceLight),
       ),
-      onPressed: () {},
+      onPressed: () {
+        final checkBoxProvider = context
+            .read<CaseInformationCheckboxProvider>();
+
+        final respondent = Respondent(
+          person1: checkBoxProvider.getSelectedType(1),
+          person2: checkBoxProvider.getSelectedType(2),
+          person3: checkBoxProvider.getSelectedType(3),
+        );
+
+        final dateFormat = DateFormat('dd/MM/yyyy');
+        DateTime? parsedNextCaseDate;
+        try {
+          parsedNextCaseDate = dateFormat.parseStrict(
+            nextCaseDateController.text,
+          );
+        } catch (_) {
+          parsedNextCaseDate = null;
+        }
+        final Judgement judgement = Judgement(
+          settlementFee: int.tryParse(installmentController.text),
+          nextSettlementDate: parsedNextCaseDate,
+          todayPayment: int.tryParse(todaysPaymentController.text),
+        );
+
+        final Other other = Other(
+          withdraw: context.read<CaseInformationCheckboxProvider>().withdraw,
+          testimony: context.read<CaseInformationCheckboxProvider>().testimony,
+          image: null,
+        );
+
+        try {
+          parsedNextCaseDate = dateFormat.parseStrict(newDate.text);
+        } catch (_) {
+          parsedNextCaseDate = null;
+        }
+
+        debugPrint("parsedNextCaseDate: $parsedNextCaseDate");
+
+        final CaseInformationRequestModel requestModel =
+            CaseInformationRequestModel(
+              userId: context.read<CommonDataProvider>().uid,
+              caseId: caseInformation.caseNumber,
+              respondent: respondent,
+              nextCaseDate: parsedNextCaseDate,
+              judgement: judgement,
+              other: other,
+            );
+
+        debugPrint("Case InformationRequestModel: ${requestModel.toJson()}");
+
+        CustomPopUp().openConfirmationPopUp(context, requestModel);
+
+        // context.read<CaseInformationUpdateBloc>().add(
+        //   RequestCaseInformationUpdate(request: requestModel),
+        // );
+      },
     );
   }
 
   Widget _imagePickerSection(
-      BuildContext context,
-      ImagePickerProvider imageProvider,
-      ) {
+    BuildContext context,
+    ImagePickerProvider imageProvider,
+  ) {
     final image = imageProvider.secondImage != null
         ? Image.file(imageProvider.secondImage!)
         : Image.asset('assets/images/place_holder_image.webp');
@@ -139,13 +427,8 @@ class CaseInformationScreen extends StatelessWidget {
                 // Dynamically sized image
                 Center(
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: maxWidth,
-                    ),
-                    child: FittedBox(
-                      fit: BoxFit.contain,
-                      child: image,
-                    ),
+                    constraints: BoxConstraints(maxWidth: maxWidth),
+                    child: FittedBox(fit: BoxFit.contain, child: image),
                   ),
                 ),
 
@@ -197,7 +480,18 @@ class CaseInformationScreen extends StatelessWidget {
             Expanded(flex: 2, child: Text(Strings.caseInformation.withdraw)),
             Expanded(
               flex: 3,
-              child: Checkbox(value: false, onChanged: (value) {}),
+              child: Consumer<CaseInformationCheckboxProvider>(
+                builder: (context, checkBoxProvider, child) {
+                  return Checkbox(
+                    value: checkBoxProvider.withdraw,
+                    onChanged: (value) {
+                      context
+                          .read<CaseInformationCheckboxProvider>()
+                          .toggleWithdraw();
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -206,7 +500,18 @@ class CaseInformationScreen extends StatelessWidget {
             Expanded(flex: 2, child: Text(Strings.caseInformation.testimony)),
             Expanded(
               flex: 3,
-              child: Checkbox(value: false, onChanged: (value) {}),
+              child: Consumer<CaseInformationCheckboxProvider>(
+                builder: (context, checkBoxProvider, child) {
+                  return Checkbox(
+                    value: checkBoxProvider.testimony,
+                    onChanged: (value) {
+                      context
+                          .read<CaseInformationCheckboxProvider>()
+                          .toggleTestimony();
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -214,8 +519,12 @@ class CaseInformationScreen extends StatelessWidget {
     );
   }
 
-  Widget _judgmentSection(BuildContext context) {
-    TextEditingController todaysPaymentController = TextEditingController();
+  Widget _judgmentSection(
+    BuildContext context,
+    TextEditingController todaysPaymentController,
+    TextEditingController installmentController,
+    TextEditingController nextCaseDateController,
+  ) {
     return Column(
       spacing: AppSizes.spacingSmall,
       children: [
@@ -240,7 +549,7 @@ class CaseInformationScreen extends StatelessWidget {
             Expanded(
               flex: 3,
               child: Custominput(
-                textEditingController: todaysPaymentController,
+                textEditingController: installmentController,
                 name: '',
               ),
             ),
@@ -254,9 +563,9 @@ class CaseInformationScreen extends StatelessWidget {
             ),
             Expanded(
               flex: 3,
-              child: Custominput(
-                textEditingController: todaysPaymentController,
-                name: '',
+              child: CustomDatePicker(
+                textEditingController: nextCaseDateController,
+                name: 'DD/MM/YYYY',
               ),
             ),
           ],
@@ -265,8 +574,10 @@ class CaseInformationScreen extends StatelessWidget {
     );
   }
 
-  Widget _nextCaseDatePicker(BuildContext context) {
-    TextEditingController datePickerController = TextEditingController();
+  Widget _nextCaseDatePicker(
+    BuildContext context,
+    TextEditingController datePickerController,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -389,7 +700,7 @@ class CaseInformationScreen extends StatelessWidget {
         Row(
           children: [
             Expanded(flex: 2, child: Text(Strings.caseInformation.value)),
-            Expanded(flex: 3, child: Text(caseInformation.value!)),
+            Expanded(flex: 3, child: Text(caseInformation.value!.toString())),
           ],
         ),
       ],
