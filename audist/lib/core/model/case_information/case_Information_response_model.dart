@@ -1,5 +1,5 @@
-class CaseInformationResponse {
-  CaseInformationResponse({
+class CaseInformationResponseModel {
+  CaseInformationResponseModel({
     required this.caseInformationResponseCase,
     required this.respondent,
     required this.information,
@@ -11,8 +11,8 @@ class CaseInformationResponse {
   final Information? information;
   final List<Payment> payments;
 
-  factory CaseInformationResponse.fromJson(Map<String, dynamic> json) {
-    return CaseInformationResponse(
+  factory CaseInformationResponseModel.fromJson(Map<String, dynamic> json) {
+    return CaseInformationResponseModel(
       caseInformationResponseCase: json["case"] == null
           ? null
           : Case.fromJson(json["case"]),
@@ -47,6 +47,8 @@ class Case {
     required this.value,
     required this.date,
     required this.status,
+    required this.nic,
+    required this.userId,
   });
 
   final String? caseNumber;
@@ -56,6 +58,8 @@ class Case {
   final int? value;
   final DateTime? date;
   final Status? status;
+  final String? nic;
+  final String? userId;
 
   factory Case.fromJson(Map<String, dynamic> json) {
     return Case(
@@ -66,6 +70,8 @@ class Case {
       value: json["value"],
       date: DateTime.tryParse(json["date"] ?? ""),
       status: json["status"] == null ? null : Status.fromJson(json["status"]),
+      nic: json["nic"],
+      userId: json["user_id"],
     );
   }
 

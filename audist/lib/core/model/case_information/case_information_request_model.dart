@@ -1,5 +1,7 @@
-class CaseInformationRequest {
-  CaseInformationRequest({
+import 'package:intl/intl.dart';
+
+class CaseInformationRequestModel {
+  CaseInformationRequestModel({
     required this.userId,
     required this.caseId,
     required this.respondent,
@@ -15,8 +17,8 @@ class CaseInformationRequest {
   final Judgement? judgement;
   final Other? other;
 
-  factory CaseInformationRequest.fromJson(Map<String, dynamic> json) {
-    return CaseInformationRequest(
+  factory CaseInformationRequestModel.fromJson(Map<String, dynamic> json) {
+    return CaseInformationRequestModel(
       userId: json["userID"],
       caseId: json["caseID"],
       respondent: json["respondent"] == null
@@ -30,12 +32,14 @@ class CaseInformationRequest {
     );
   }
 
+  final dateFormatter = DateFormat('yyyy-MM-dd');
   Map<String, dynamic> toJson() => {
     "userID": userId,
     "caseID": caseId,
     "respondent": respondent?.toJson(),
-    "nextCaseDate":
-        "${nextCaseDate?.year.toString().padLeft(4, '0')}-${nextCaseDate?.month.toString().padLeft(2, '0')}-${nextCaseDate?.day.toString().padLeft(2, '0')}",
+    "nextCaseDate": nextCaseDate != null
+        ? dateFormatter.format(nextCaseDate!)
+        : null,
     "judgement": judgement?.toJson(),
     "other": other?.toJson(),
   };
@@ -60,10 +64,10 @@ class Judgement {
     );
   }
 
+  final dateFormatter = DateFormat('yyyy-MM-dd');
   Map<String, dynamic> toJson() => {
     "settlementFee": settlementFee,
-    "nextSettlementDate":
-        "${nextSettlementDate?.year.toString().padLeft(4, '0')}-${nextSettlementDate?.month.toString().padLeft(2, '0')}-${nextSettlementDate?.day.toString().padLeft(2, '0')}",
+    "nextSettlementDate": nextSettlementDate != null ? dateFormatter.format(nextSettlementDate!) : null,
     "todayPayment": todayPayment,
   };
 }

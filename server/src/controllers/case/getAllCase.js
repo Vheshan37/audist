@@ -746,8 +746,7 @@ const allCaseDetails = async (req, res) => {
       }
     });
 
-    console.log("Fetched case detail:", JSON.stringify(caseDetail));
-
+  
 
     if (!caseDetail) {
       return res.status(404).json({ error: "Case not found" });
@@ -762,6 +761,8 @@ const allCaseDetails = async (req, res) => {
 
     const output = {
       case: {
+        userID: caseDetail.user_id,
+        nic: caseDetail.nic,
         caseNumber: caseDetail.case_number,
         refereeNo: caseDetail.referee_no,
         name: caseDetail.name,

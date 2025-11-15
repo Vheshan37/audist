@@ -1,4 +1,7 @@
 import 'package:audist/core/model/add_new_case/add_new_case_request_model.dart';
+import 'package:audist/core/model/case_information/case_Information_response_model.dart';
+import 'package:audist/core/model/case_information/case_information_request_model.dart';
+import 'package:audist/core/model/case_information/case_information_view_model.dart';
 import 'package:audist/data/cases/datasource/case_datasource.dart';
 import 'package:audist/data/cases/model/fetch_case_request.dart';
 import 'package:audist/domain/cases/repository/case_repository.dart';
@@ -19,5 +22,15 @@ class CaseRepositoryImpl extends CaseRepository {
   @override
   Future<Either> addNewCase(AddNewCaseRequestModel request) async {
     return await sl<CaseDatasource>().addNewCase(request);
+  }
+
+  @override
+  Future<Either> caseInformationUpdate(CaseInformationRequestModel request) async {
+    return await sl<CaseDatasource>().updateCaseInformation(request);
+  }
+
+  @override
+  Future<Either<dynamic, CaseInformationResponseModel>> caseInformationDetails(CaseInformationViewModel request) async {
+    return await sl<CaseDatasource>().getCaseInformationData(request);
   }
 }
