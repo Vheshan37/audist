@@ -6,6 +6,9 @@ import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
 import 'package:audist/core/navigation/app_navigator.dart';
 import 'package:audist/presentation/cases/case_information/blocs/update/case_information_update_bloc.dart';
+import 'package:audist/presentation/home/blocs/allcase/all_case_bloc.dart';
+import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
+import 'package:audist/providers/common_data_provider.dart';
 import 'package:audist/providers/language_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -186,6 +189,24 @@ class CustomPopUp {
                                       AppNavigator.pushReplacement(
                                         AppRoutes.home,
                                       );
+
+                                      // * fetch all case after case information updated
+                                      context.read<AllCaseBloc>().add(
+                                        RequestAllCase(
+                                          uid: context
+                                              .read<CommonDataProvider>()
+                                              .uid!,
+                                        ),
+                                      );
+
+                                      // * fetch case after case information updated
+                                      context.read<FetchCaseBloc>().add(
+                                        RequestFetchCase(
+                                          uid: context
+                                              .read<CommonDataProvider>()
+                                              .uid!,
+                                        ),
+                                      );
                                     }
                                     if (state is CaseInformationUpdateFailed) {
                                       AppNavigator.pop(context);
@@ -212,6 +233,15 @@ class CustomPopUp {
                                         AppNavigator.pop(context);
                                         // 🔥 Trigger your bloc or API call here
                                         // Example:
+                                        debugPrint(
+                                          "==========================================",
+                                        );
+                                        debugPrint(
+                                          "Request Model: ${requestModel.toJson()}",
+                                        );
+                                        debugPrint(
+                                          "==========================================",
+                                        );
                                         context
                                             .read<CaseInformationUpdateBloc>()
                                             .add(

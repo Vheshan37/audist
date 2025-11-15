@@ -1,5 +1,8 @@
+import 'package:audist/core/exception/add_payment_exception.dart';
 import 'package:audist/core/exception/case_information_update_exception.dart';
 import 'package:audist/core/model/add_new_case/add_new_case_request_model.dart';
+import 'package:audist/core/model/add_payment/add_payment_request_model.dart';
+import 'package:audist/core/model/add_payment/add_payment_response_model.dart';
 import 'package:audist/core/model/case_information/case_Information_response_model.dart';
 import 'package:audist/core/model/case_information/case_information_request_model.dart';
 import 'package:audist/core/model/case_information/case_information_view_model.dart';
@@ -14,7 +17,12 @@ abstract class CaseDatasource {
   Future<Either> fetchAllKindOfCases(FetchCaseRequest request);
   Future<Either> addNewCase(AddNewCaseRequestModel request);
   Future<Either> updateCaseInformation(CaseInformationRequestModel request);
-  Future<Either<dynamic, CaseInformationResponseModel>> getCaseInformationData(CaseInformationViewModel request);
+  Future<Either<dynamic, CaseInformationResponseModel>> getCaseInformationData(
+    CaseInformationViewModel request,
+  );
+  Future<Either<AddPaymentException, AddPaymentResponseModel>> addPayment(
+    AddPaymentRequestModel request,
+  );
 }
 
 class CaseDatasourceImpl extends CaseDatasource {
@@ -205,6 +213,37 @@ class CaseDatasourceImpl extends CaseDatasource {
       return Left(e);
     } finally {
       debugPrint("============(getCaseInformationData)============");
+    }
+  }
+
+  @override
+  Future<Either<AddPaymentException, AddPaymentResponseModel>> addPayment(
+    AddPaymentRequestModel request,
+  ) async {
+    debugPrint("=============(addPayment)===========");
+
+    try {
+      final dio = DioClient().dio;
+
+      final response = await dio.post(
+        'payment/addpayment',
+        data: request.toJson(),
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
+
+      debugPrint("========================");
+      debugPrint("========================");
+      debugPrint('Response (Success) addPayment: $response');
+      debugPrint('Response (Success) addPayment: ${response.data}');
+      debugPrint("========================");
+      debugPrint("========================");
+
+      return Right(AddPaymentResponseModel.fromJson(response.data));
+    } catch (e) {
+      debugPrint('Response (Failed): $e');
+      return Left(AddPaymentException(message: e.toString()));
+    } finally {
+      debugPrint("============(addPayment)============");
     }
   }
 }

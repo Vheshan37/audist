@@ -7,11 +7,13 @@ class Custominput extends StatelessWidget {
   final String name;
   final bool secure;
   final String? Function(String?)? validatorFunction;
+  final bool enabled;
   const Custominput({
     super.key,
     required this.textEditingController,
     required this.name,
     this.secure = false,
+    this.enabled = true,
     this.validatorFunction,
   });
 
@@ -20,6 +22,7 @@ class Custominput extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0), // consistent spacing
       child: TextFormField(
+        enabled: enabled,
         controller: textEditingController,
         obscureText: secure,
         maxLines: secure ? 1 : null,
@@ -45,10 +48,7 @@ class Custominput extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSizes.borderRadiusMedium),
-            borderSide: BorderSide(
-              color: AppColors.brandAccent,
-              width: 2.0,
-            ),
+            borderSide: BorderSide(color: AppColors.brandAccent, width: 2.0),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSizes.borderRadiusMedium),
@@ -56,10 +56,7 @@ class Custominput extends StatelessWidget {
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSizes.borderRadiusMedium),
-            borderSide: BorderSide(
-              color: AppColors.errorColor,
-              width: 2.0,
-            ),
+            borderSide: BorderSide(color: AppColors.errorColor, width: 2.0),
           ),
         ),
         validator: validatorFunction,

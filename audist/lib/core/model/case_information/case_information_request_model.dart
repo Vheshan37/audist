@@ -67,7 +67,9 @@ class Judgement {
   final dateFormatter = DateFormat('yyyy-MM-dd');
   Map<String, dynamic> toJson() => {
     "settlementFee": settlementFee,
-    "nextSettlementDate": nextSettlementDate != null ? dateFormatter.format(nextSettlementDate!) : null,
+    "nextSettlementDate": nextSettlementDate != null
+        ? dateFormatter.format(nextSettlementDate!)
+        : null,
     "todayPayment": todayPayment,
   };
 }
@@ -101,9 +103,9 @@ class Respondent {
     required this.person3,
   });
 
-  final String? person1;
-  final String? person2;
-  final String? person3;
+  late String? person1;
+  late String? person2;
+  late String? person3;
 
   factory Respondent.fromJson(Map<String, dynamic> json) {
     return Respondent(

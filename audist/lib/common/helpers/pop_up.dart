@@ -10,6 +10,7 @@ import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
 import 'package:audist/domain/cases/entities/case_entity.dart';
 import 'package:audist/presentation/cases/case_information/blocs/details/case_information_detail_bloc.dart';
+import 'package:audist/providers/case_information_provider.dart';
 import 'package:audist/providers/common_data_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,6 +27,9 @@ class PopUp {
   });
 
   void openPopUp(BuildContext context) {
+    debugPrint("====================================");
+    debugPrint("Case Type is: $caseType");
+    debugPrint("====================================");
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -163,6 +167,32 @@ class PopUp {
                   ),
                 ],
               ),
+              SizedBox(height: 10),
+              Divider(),
+              if (!isNextCase)
+                CustomButton(
+                  content: Text(
+                    Strings.addPayment.title,
+                    style: TextStyle(color: AppColors.surfaceLight),
+                  ),
+                  onPressed: () {
+                    AppNavigator.pushReplacement(AppRoutes.home);
+                    AppNavigator.push(AppRoutes.addPayment, arguments: caseInformation);
+                  },
+                ),
+              if (!isNextCase) SizedBox(height: AppSizes.spacingSmall,),
+              if (!isNextCase)
+                CustomButton(
+                  content: Text(
+                    Strings.ledger.title,
+                    style: TextStyle(color: AppColors.surfaceLight),
+                  ),
+                  onPressed: () {
+                    AppNavigator.pushReplacement(AppRoutes.home);
+                    AppNavigator.push(AppRoutes.paymentHistory, arguments: caseInformation);
+                  },
+                ),
+              if (!isNextCase) SizedBox(height: AppSizes.spacingSmall,),
               if (isNextCase)
                 Column(
                   children: [
@@ -182,8 +212,7 @@ class PopUp {
                     ),
                   ],
                 ),
-              SizedBox(height: 10),
-              Divider(),
+              if (isNextCase) SizedBox(height: AppSizes.spacingSmall,),
               BlocConsumer<
                 CaseInformationDetailBloc,
                 CaseInformationDetailState
@@ -207,6 +236,10 @@ class PopUp {
                       title: "Case Information Loaded",
                       description:
                           "The case details have been successfully retrieved and are ready to review.",
+                    );
+
+                    context.read<CaseInformationProvider>().setResponse(
+                      state.response,
                     );
 
                     AppNavigator.pop(context);

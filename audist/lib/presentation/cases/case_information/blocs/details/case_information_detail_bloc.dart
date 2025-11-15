@@ -1,6 +1,7 @@
 import 'package:audist/core/model/case_information/case_Information_response_model.dart';
 import 'package:audist/core/model/case_information/case_information_view_model.dart';
 import 'package:audist/domain/cases/usecase/fetch_case_information_usecase.dart';
+import 'package:audist/providers/case_information_provider.dart';
 import 'package:audist/service_locator.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';

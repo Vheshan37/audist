@@ -1,4 +1,7 @@
+import 'package:audist/core/exception/add_payment_exception.dart';
 import 'package:audist/core/model/add_new_case/add_new_case_request_model.dart';
+import 'package:audist/core/model/add_payment/add_payment_request_model.dart';
+import 'package:audist/core/model/add_payment/add_payment_response_model.dart';
 import 'package:audist/core/model/case_information/case_Information_response_model.dart';
 import 'package:audist/core/model/case_information/case_information_request_model.dart';
 import 'package:audist/core/model/case_information/case_information_view_model.dart';
@@ -32,5 +35,10 @@ class CaseRepositoryImpl extends CaseRepository {
   @override
   Future<Either<dynamic, CaseInformationResponseModel>> caseInformationDetails(CaseInformationViewModel request) async {
     return await sl<CaseDatasource>().getCaseInformationData(request);
+  }
+
+  @override
+  Future<Either<AddPaymentException, AddPaymentResponseModel>> addPayment(AddPaymentRequestModel request) async {
+    return await sl<CaseDatasource>().addPayment(request);
   }
 }

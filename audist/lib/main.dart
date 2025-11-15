@@ -9,10 +9,12 @@ import 'package:audist/presentation/cases/case_information/blocs/update/case_inf
 import 'package:audist/presentation/home/blocs/allcase/all_case_bloc.dart';
 import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
 import 'package:audist/presentation/home/pages/home_screen.dart';
+import 'package:audist/presentation/payments/add_payment/bloc/add_payment_bloc.dart';
 import 'package:audist/presentation/splash/bloc/authorization_bloc.dart';
 import 'package:audist/presentation/splash/pages/splash_screen.dart';
 import 'package:audist/providers/case_filter_provider.dart';
 import 'package:audist/providers/case_information_checkbox_provider.dart';
+import 'package:audist/providers/case_information_provider.dart';
 import 'package:audist/providers/common_data_provider.dart';
 import 'package:audist/providers/image_picker_provider.dart';
 import 'package:audist/providers/language_provider.dart';
@@ -39,6 +41,7 @@ void main() async {
         ),
         ChangeNotifierProvider(create: (context) => CaseFilterProvider()),
         ChangeNotifierProvider(create: (context) => CommonDataProvider()),
+        ChangeNotifierProvider(create: (context) => CaseInformationProvider()),
       ],
       child: GestureDetector(
         onLongPress: () {
@@ -53,6 +56,7 @@ void main() async {
             BlocProvider(create: (context) => AddCaseBloc()),
             BlocProvider(create: (context) => CaseInformationUpdateBloc()),
             BlocProvider(create: (context) => CaseInformationDetailBloc()),
+            BlocProvider(create: (context) => AddPaymentBloc()),
           ],
           child: const MyApp(),
         ),

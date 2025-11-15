@@ -2,9 +2,9 @@ import 'package:flutter/cupertino.dart';
 
 class CaseInformationCheckboxProvider extends ChangeNotifier {
   final Map<int, Map<String, bool>> _checkboxGroups = {
-    1: {'summon': false, 'newAddress': false, 'warrant': false},
-    2: {'summon': false, 'newAddress': false, 'warrant': false},
-    3: {'summon': false, 'newAddress': false, 'warrant': false},
+    1: {'summons': false, 'newAddress': false, 'warrant': false},
+    2: {'summons': false, 'newAddress': false, 'warrant': false},
+    3: {'summons': false, 'newAddress': false, 'warrant': false},
   };
 
   bool withdraw = false;
@@ -12,6 +12,19 @@ class CaseInformationCheckboxProvider extends ChangeNotifier {
   void toggleWithdraw() {
     withdraw = !withdraw;
     notifyListeners();
+  }
+
+  void resetAll() {
+    // Reset respondent statuses
+    _checkboxGroups.forEach((index, group) {
+      group.updateAll((key, value) => false);
+    });
+
+    // Reset withdraw / testimony
+    withdraw = false;
+    testimony = false;
+
+    // notifyListeners();
   }
 
   void toggleTestimony() {
