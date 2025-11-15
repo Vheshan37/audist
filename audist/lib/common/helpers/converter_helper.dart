@@ -85,7 +85,7 @@ class ConverterHelper {
   static String formatCurrency(
     double value, {
     String locale = 'en_US',
-    String symbol = '₨',
+    String symbol = '₨ ',
     int decimalDigits = 2,
   }) {
     return NumberFormat.currency(

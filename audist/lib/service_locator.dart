@@ -10,6 +10,7 @@ import 'package:audist/domain/cases/usecase/add_payment_usecase.dart';
 import 'package:audist/domain/cases/usecase/fetch_all_case_usecase.dart';
 import 'package:audist/domain/cases/usecase/fetch_all_kind_cases_usecase.dart';
 import 'package:audist/domain/cases/usecase/fetch_case_information_usecase.dart';
+import 'package:audist/domain/cases/usecase/fetch_case_payment_usecase.dart';
 import 'package:audist/domain/cases/usecase/update_case_information_usecase.dart';
 import 'package:audist/providers/case_information_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -39,6 +40,9 @@ Future<void> initializeDependencies() async {
   );
   sl.registerSingleton<AddPaymentUsecase>(
     AddPaymentUsecase(),
+  );
+  sl.registerSingleton<FetchCasePaymentUsecase>(
+    FetchCasePaymentUsecase(),
   );
 
   // providers

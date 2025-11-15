@@ -700,10 +700,10 @@ class _CaseInformationScreenState extends State<CaseInformationScreen> {
         : '';
 
     // Preload image if exists
-    if (response.information?.image != null &&
-        response.information!.image!.isNotEmpty) {
-      imageProvider.setSecondImage(File(response.information!.image!));
-    }
+    // if (response.information?.image != null &&
+    //     response.information!.image!.isNotEmpty) {
+    //   imageProvider.setSecondImage(File(response.information!.image!));
+    // }
   }
 
   // Helper method to map API status to checkbox type

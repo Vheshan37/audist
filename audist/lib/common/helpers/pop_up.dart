@@ -20,15 +20,20 @@ class PopUp {
   final bool isNextCase;
   final String caseType;
   final CaseEntity? caseInformation;
+  final String? caseStatus;
   PopUp({
     required this.isNextCase,
     this.caseInformation,
     required this.caseType,
+    required this.caseStatus,
   });
 
   void openPopUp(BuildContext context) {
     debugPrint("====================================");
     debugPrint("Case Type is: $caseType");
+    debugPrint("====================================");
+    debugPrint("====================================");
+    debugPrint("Case Status is: $caseStatus");
     debugPrint("====================================");
     showDialog(
       context: context,
@@ -169,7 +174,7 @@ class PopUp {
               ),
               SizedBox(height: 10),
               Divider(),
-              if (!isNextCase)
+              if (!isNextCase && caseStatus == "ongoing")
                 CustomButton(
                   content: Text(
                     Strings.addPayment.title,
@@ -177,10 +182,13 @@ class PopUp {
                   ),
                   onPressed: () {
                     AppNavigator.pushReplacement(AppRoutes.home);
-                    AppNavigator.push(AppRoutes.addPayment, arguments: caseInformation);
+                    AppNavigator.push(
+                      AppRoutes.addPayment,
+                      arguments: caseInformation,
+                    );
                   },
                 ),
-              if (!isNextCase) SizedBox(height: AppSizes.spacingSmall,),
+              if (!isNextCase) SizedBox(height: AppSizes.spacingSmall),
               if (!isNextCase)
                 CustomButton(
                   content: Text(
@@ -189,10 +197,13 @@ class PopUp {
                   ),
                   onPressed: () {
                     AppNavigator.pushReplacement(AppRoutes.home);
-                    AppNavigator.push(AppRoutes.paymentHistory, arguments: caseInformation);
+                    AppNavigator.push(
+                      AppRoutes.paymentHistory,
+                      arguments: caseInformation,
+                    );
                   },
                 ),
-              if (!isNextCase) SizedBox(height: AppSizes.spacingSmall,),
+              if (!isNextCase) SizedBox(height: AppSizes.spacingSmall),
               if (isNextCase)
                 Column(
                   children: [
@@ -212,70 +223,73 @@ class PopUp {
                     ),
                   ],
                 ),
-              if (isNextCase) SizedBox(height: AppSizes.spacingSmall,),
-              BlocConsumer<
-                CaseInformationDetailBloc,
-                CaseInformationDetailState
-              >(
-                listener: (context, state) {
-                  if (state is CaseInformationDetailFailed) {
-                    AppAlert.show(
-                      context,
-                      type: AlertType.error,
-                      title: "Unable to Load Case Information",
-                      description:
-                          "We couldn’t retrieve the case details. Please check your connection and try again.",
-                    );
-                    AppNavigator.pop(context);
-                  }
+              if (isNextCase) SizedBox(height: AppSizes.spacingSmall),
+              if (isNextCase ||
+                  caseStatus == "ongoing" ||
+                  caseStatus == "pending")
+                BlocConsumer<
+                  CaseInformationDetailBloc,
+                  CaseInformationDetailState
+                >(
+                  listener: (context, state) {
+                    if (state is CaseInformationDetailFailed) {
+                      AppAlert.show(
+                        context,
+                        type: AlertType.error,
+                        title: "Unable to Load Case Information",
+                        description:
+                            "We couldn’t retrieve the case details. Please check your connection and try again.",
+                      );
+                      AppNavigator.pop(context);
+                    }
 
-                  if (state is CaseInformationDetailSuccess) {
-                    AppAlert.show(
-                      context,
-                      type: AlertType.success,
-                      title: "Case Information Loaded",
-                      description:
-                          "The case details have been successfully retrieved and are ready to review.",
+                    if (state is CaseInformationDetailSuccess) {
+                      AppAlert.show(
+                        context,
+                        type: AlertType.success,
+                        title: "Case Information Loaded",
+                        description:
+                            "The case details have been successfully retrieved and are ready to review.",
+                      );
+
+                      context.read<CaseInformationProvider>().setResponse(
+                        state.response,
+                      );
+
+                      AppNavigator.pop(context);
+                      AppNavigator.push(
+                        AppRoutes.caseinformation,
+                        arguments: state.response,
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    Widget child = Text(
+                      Strings.casePopUp.primaryButton,
+                      style: TextStyle(color: AppColors.surfaceLight),
                     );
 
-                    context.read<CaseInformationProvider>().setResponse(
-                      state.response,
-                    );
+                    if (state is CaseInformationDetailLoading) {
+                      child = CircularProgressIndicator(
+                        color: AppColors.surfaceLight,
+                      );
+                    }
 
-                    AppNavigator.pop(context);
-                    AppNavigator.push(
-                      AppRoutes.caseinformation,
-                      arguments: state.response,
-                    );
-                  }
-                },
-                builder: (context, state) {
-                  Widget child = Text(
-                    Strings.casePopUp.primaryButton,
-                    style: TextStyle(color: AppColors.surfaceLight),
-                  );
-
-                  if (state is CaseInformationDetailLoading) {
-                    child = CircularProgressIndicator(
-                      color: AppColors.surfaceLight,
-                    );
-                  }
-
-                  return CustomButton(
-                    content: child,
-                    onPressed: () => {
-                      context.read<CaseInformationDetailBloc>().add(
-                        RequestCaseInformationEvent(
-                          request: CaseInformationViewModel(
-                            caseId: caseInformation!.caseNumber!,
-                            userId: context.read<CommonDataProvider>().uid!,
+                    return CustomButton(
+                      content: child,
+                      onPressed: () => {
+                        context.read<CaseInformationDetailBloc>().add(
+                          RequestCaseInformationEvent(
+                            request: CaseInformationViewModel(
+                              caseId: caseInformation!.caseNumber!,
+                              userId: context.read<CommonDataProvider>().uid!,
+                            ),
                           ),
                         ),
-                      ),
-                    },
-                  );
-                },
-              ),
+                      },
+                    );
+                  },
+                ),
             ],
           ),
         ),

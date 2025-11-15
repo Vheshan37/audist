@@ -9,10 +9,12 @@ import 'package:audist/common/widgets/custom_text_area.dart';
 import 'package:audist/common/widgets/drawer.dart';
 import 'package:audist/core/color.dart';
 import 'package:audist/core/model/add_payment/add_payment_request_model.dart';
+import 'package:audist/core/model/fetch_payment/fetch_payment_request.dart';
 import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
 import 'package:audist/domain/cases/entities/case_entity.dart';
-import 'package:audist/presentation/payments/add_payment/bloc/add_payment_bloc.dart';
+import 'package:audist/presentation/payments/add_payment/blocs/add_payment/add_payment_bloc.dart';
+import 'package:audist/presentation/payments/add_payment/blocs/fetch_payment/fetch_payment_bloc.dart';
 import 'package:audist/providers/common_data_provider.dart';
 import 'package:audist/providers/language_provider.dart';
 import 'package:flutter/material.dart';
@@ -56,6 +58,7 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
     paidAmountController = TextEditingController();
     payableAmountController = TextEditingController();
 
+    amountController.addListener(_updateBalance);
     // final initialNextPayment = DateTime.now().add(Duration(days: 30));
     // dateController.text = ConverterHelper.dateTimeToString(initialNextPayment);
   }
@@ -76,6 +79,7 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
 
   @override
   void dispose() {
+    _clearForm();
     // Dispose all controllers to prevent memory leaks
     caseNumberController.dispose();
     idController.dispose();
@@ -91,6 +95,43 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
     super.dispose();
   }
 
+  // TODO: implement this method to get the payment information when press the select button
+  void _fetchCasePayment(
+    BuildContext context,
+    FetchPaymentRequest fetchPaymentRequest,
+  ) {
+    context.read<FetchPaymentBloc>().add(
+      RequestFetchPayment(request: fetchPaymentRequest),
+    );
+  }
+
+  void _loadData(CaseEntity caseEntity) {
+    caseNumberController.text = caseEntity.caseNumber!;
+    idController.text = caseEntity.refereeNo!;
+    nameController.text = caseEntity.name!;
+    organizationController.text = caseEntity.organization!;
+    valueController.text = NumberFormat.currency(
+      locale: 'en_US',
+      symbol: 'Rs.',
+    ).format(caseEntity.value!);
+    paidAmountController.text = "";
+    payableAmountController.text = "";
+  }
+
+  double payableAmount = 0;
+
+  void _updateBalance() {
+    final enteredAmount =
+        double.tryParse(
+          amountController.text.replaceAll(RegExp(r'[^0-9.]'), ''),
+        ) ??
+        0.0;
+
+    final balance = payableAmount - enteredAmount;
+
+    balanceController.text = balance.toStringAsFixed(2);
+  }
+
   @override
   Widget build(BuildContext context) {
     final formKey = GlobalKey<FormState>();
@@ -101,17 +142,14 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
 
     if (arguiment is CaseEntity) {
       caseEntity = arguiment;
+      _loadData(caseEntity);
 
-      caseNumberController.text = caseEntity.caseNumber!;
-      idController.text = caseEntity.refereeNo!;
-      nameController.text = caseEntity.name!;
-      organizationController.text = caseEntity.organization!;
-      valueController.text = NumberFormat.currency(
-        locale: 'en_US',
-        symbol: 'Rs.',
-      ).format(caseEntity.value!);
-      paidAmountController.text = "";
-      payableAmountController.text = "";
+      FetchPaymentRequest fetchPaymentRequest = FetchPaymentRequest(
+        caseNumb: caseEntity.caseNumber!,
+        userId: context.read<CommonDataProvider>().uid!,
+        includePayments: true,
+      );
+      _fetchCasePayment(context, fetchPaymentRequest);
     }
 
     debugPrint("Case Entity: ${caseEntity != null}");
@@ -151,13 +189,76 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
             ),
             Expanded(
               flex: 1,
-              child: CustomButton(
-                content: Text(
-                  Strings.addPayment.select,
-                  style: TextStyle(color: AppColors.surfaceLight),
-                ),
-                onPressed: () {
-                  // TODO: Implement add payment functionality
+              child: BlocConsumer<FetchPaymentBloc, FetchPaymentState>(
+                listener: (context, state) {
+                  if (state is FetchPaymentSuccess) {
+                    AppAlert.show(
+                      context,
+                      type: AlertType.success,
+                      title: "Case Details Retrieved",
+                      description:
+                          "Payment information has been successfully loaded.",
+                    );
+
+                    paidAmountController.text = ConverterHelper.formatCurrency(
+                      ConverterHelper.objectToDouble(
+                        state.data.fetchPaymentResponseCase?.totalPaid,
+                      ),
+                    );
+
+                    payableAmount = ConverterHelper.objectToDouble(
+                      state.data.fetchPaymentResponseCase?.remaining,
+                    );
+
+                    payableAmountController.text =
+                        ConverterHelper.formatCurrency(payableAmount);
+                  }
+                  if (state is FetchPaymentFailed) {
+                    AppAlert.show(
+                      context,
+                      type: AlertType.warning,
+                      title: "Unable to Retrieve Case",
+                      description: state.message,
+                    );
+                  }
+                  // TODO: implement listener
+                },
+                builder: (context, state) {
+                  if (state is FetchPaymentLoading) {
+                    return CustomButton(
+                      content: CircularProgressIndicator(
+                        color: AppColors.surfaceLight,
+                      ),
+                      onPressed: () {
+                        // TODO: Implement add payment functionality
+                      },
+                    );
+                  }
+                  return CustomButton(
+                    content: Text(
+                      Strings.addPayment.select,
+                      style: TextStyle(color: AppColors.surfaceLight),
+                    ),
+                    onPressed: () {
+                      if (caseNumberController.text.isEmpty) {
+                        AppAlert.show(
+                          context,
+                          type: AlertType.warning,
+                          title: "Case Number Required",
+                          description:
+                              "Please enter a valid case number before continuing.",
+                        );
+                        return;
+                      }
+                      FetchPaymentRequest fetchPaymentRequest =
+                          FetchPaymentRequest(
+                            caseNumb: caseNumberController.text,
+                            userId: context.read<CommonDataProvider>().uid!,
+                            includePayments: true,
+                          );
+                      _fetchCasePayment(context, fetchPaymentRequest);
+                    },
+                  );
                 },
               ),
             ),
