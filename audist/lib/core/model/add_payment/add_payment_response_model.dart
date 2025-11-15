@@ -1,47 +1,37 @@
-class AddPaymentResponse {
-  AddPaymentResponse({
+import 'package:audist/common/helpers/converter_helper.dart';
+
+class AddPaymentResponseModel {
+  AddPaymentResponseModel({
     required this.message,
     required this.payment,
-    required this.caseUpdate,
+    required this.totalPaid,
+    required this.remaining,
+    required this.caseStatus,
   });
 
-  final String? message;
-  final Payment? payment;
-  final CaseUpdate? caseUpdate;
+  final String message;
+  final Payment payment;
+  final int totalPaid;
+  final int remaining;
+  final String caseStatus;
 
-  factory AddPaymentResponse.fromJson(Map<String, dynamic> json){
-    return AddPaymentResponse(
+  factory AddPaymentResponseModel.fromJson(Map<String, dynamic> json) {
+    return AddPaymentResponseModel(
       message: json["message"],
-      payment: json["payment"] == null ? null : Payment.fromJson(json["payment"]),
-      caseUpdate: json["case_update"] == null ? null : CaseUpdate.fromJson(json["case_update"]),
+      payment: Payment.fromJson(json["payment"]),
+      totalPaid: json["total_paid"],
+      remaining: json["remaining"],
+      caseStatus: json["case_status"],
     );
   }
 
   Map<String, dynamic> toJson() => {
     "message": message,
-    "payment": payment?.toJson(),
-    "case_update": caseUpdate?.toJson(),
+    "payment": payment.toJson(),
+    "total_paid": totalPaid,
+    "remaining": remaining,
+    "case_status": caseStatus,
   };
-
-}
-
-class CaseUpdate {
-  CaseUpdate({
-    required this.count,
-  });
-
-  final int? count;
-
-  factory CaseUpdate.fromJson(Map<String, dynamic> json){
-    return CaseUpdate(
-      count: json["count"],
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-    "count": count,
-  };
-
 }
 
 class Payment {
@@ -53,18 +43,18 @@ class Payment {
     required this.description,
   });
 
-  final int? id;
-  final String? caseNumber;
-  final int? payment;
-  final DateTime? collectionDate;
+  final int id;
+  final String caseNumber;
+  final int payment;
+  final DateTime collectionDate;
   final String? description;
 
-  factory Payment.fromJson(Map<String, dynamic> json){
+  factory Payment.fromJson(Map<String, dynamic> json) {
     return Payment(
       id: json["id"],
       caseNumber: json["case_number"],
       payment: json["payment"],
-      collectionDate: DateTime.tryParse(json["collection_date"] ?? ""),
+      collectionDate: ConverterHelper.parseDate(json["collection_date"]),
       description: json["description"],
     );
   }
@@ -73,8 +63,10 @@ class Payment {
     "id": id,
     "case_number": caseNumber,
     "payment": payment,
-    "collection_date": collectionDate?.toIso8601String(),
+    "collection_date": ConverterHelper.dateTimeToCustomString(
+      collectionDate,
+      "dd/MM/YYYY",
+    ),
     "description": description,
   };
-
 }

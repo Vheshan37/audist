@@ -6,10 +6,13 @@ import 'package:audist/domain/auth/repository/auth_repository.dart';
 import 'package:audist/domain/auth/use_cases/login_usecase.dart';
 import 'package:audist/domain/cases/repository/case_repository.dart';
 import 'package:audist/domain/cases/usecase/add_new_case_usecase.dart';
+import 'package:audist/domain/cases/usecase/add_payment_usecase.dart';
 import 'package:audist/domain/cases/usecase/fetch_all_case_usecase.dart';
 import 'package:audist/domain/cases/usecase/fetch_all_kind_cases_usecase.dart';
 import 'package:audist/domain/cases/usecase/fetch_case_information_usecase.dart';
+import 'package:audist/domain/cases/usecase/fetch_case_payment_usecase.dart';
 import 'package:audist/domain/cases/usecase/update_case_information_usecase.dart';
+import 'package:audist/providers/case_information_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
@@ -35,6 +38,13 @@ Future<void> initializeDependencies() async {
   sl.registerSingleton<FetchCaseInformationUseCase>(
     FetchCaseInformationUseCase(),
   );
-  // sl.registerSingleton<GetAgesUseCase>(GetAgesUseCase());
-  // sl.registerSingleton<ForgotPasswordUseCase>(ForgotPasswordUseCase());
+  sl.registerSingleton<AddPaymentUsecase>(
+    AddPaymentUsecase(),
+  );
+  sl.registerSingleton<FetchCasePaymentUsecase>(
+    FetchCasePaymentUsecase(),
+  );
+
+  // providers
+  sl.registerSingleton<CaseInformationProvider>(CaseInformationProvider());
 }

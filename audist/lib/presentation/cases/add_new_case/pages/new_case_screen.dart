@@ -1,4 +1,5 @@
 import 'package:audist/common/helpers/app_alert.dart';
+import 'package:audist/common/helpers/converter_helper.dart';
 import 'package:audist/common/widgets/custom_app_bar.dart';
 import 'package:audist/common/widgets/custom_background.dart';
 import 'package:audist/common/widgets/custom_button.dart';
@@ -248,8 +249,7 @@ class _NewCaseScreenState extends State<NewCaseScreen> {
                 context,
                 type: AlertType.error,
                 title: "Failed to Add Case",
-                description:
-                    "Something went wrong while saving your case. Please try again.",
+                description: state.errorMessage,
               );
             } else {
               debugPrint("Something else happened");
@@ -351,8 +351,8 @@ class _NewCaseScreenState extends State<NewCaseScreen> {
       ),
       onPressed: () {
         if (_formKey.currentState!.validate()) {
-          final formattedDate = DateFormat('yyyy-MM-dd').format(
-            DateFormat('dd/MM/yyyy').parse(nextHearingDateController.text),
+          final formattedDate = ConverterHelper.formatDate(
+            nextHearingDateController.text,
           );
 
           context.read<AddCaseBloc>().add(

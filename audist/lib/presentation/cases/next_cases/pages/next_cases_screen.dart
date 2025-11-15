@@ -120,7 +120,8 @@ class NextCasesScreen extends StatelessWidget {
                               PopUp(
                                 isNextCase: true,
                                 caseInformation: list[index],
-                                caseType: context.read<LanguageProvider>().isEnglish ? "Pending Case" : "ඉදිරි නඩුවක්"
+                                caseType: context.read<LanguageProvider>().isEnglish ? "Pending Case" : "ඉදිරි නඩුවක්",
+                                caseStatus: "pending"
                               ).openPopUp(context);
                             },
                             child: Container(

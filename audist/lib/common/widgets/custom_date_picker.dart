@@ -20,7 +20,7 @@ class CustomDatePicker extends StatelessWidget {
     this.firstDate,
     this.lastDate,
     this.initialDate,
-    this.dateFormat = 'dd/MM/yyyy',
+    this.dateFormat = 'yyyy-MM-dd',
   });
 
   @override

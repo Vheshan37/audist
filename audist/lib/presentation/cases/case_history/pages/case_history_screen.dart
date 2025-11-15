@@ -157,6 +157,7 @@ class CaseHistoryScreen extends StatelessWidget {
                                 isNextCase: false,
                                 caseInformation: caseEntity,
                                 caseType: caseType,
+                                caseStatus: list[index].caseStatus?.status,
                               ).openPopUp(context);
                             },
                             child: Container(
