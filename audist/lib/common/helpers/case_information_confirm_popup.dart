@@ -175,6 +175,15 @@ class CustomPopUp {
                                   CaseInformationUpdateState
                                 >(
                                   listener: (context, state) {
+                                    debugPrint(
+                                      "==========================================",
+                                    );
+                                    debugPrint(
+                                      'CaseInformationUpdate State: $state',
+                                    );
+                                    debugPrint(
+                                      "==========================================",
+                                    );
                                     if (state is CaseInformationUpdateSuccess) {
                                       AppNavigator.pop(context);
                                       AppAlert.show(
@@ -216,10 +225,21 @@ class CustomPopUp {
                                         title: "Update Failed",
                                         description: state.message,
                                       );
-                                      Future.delayed(Duration(seconds: 2));
                                     }
                                   },
                                   builder: (context, state) {
+                                    if (state is CaseInformationUpdateLoading) {
+                                      return CustomButton(
+                                        content: SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(
+                                            color: AppColors.surfaceLight,
+                                          ),
+                                        ),
+                                        onPressed: () {},
+                                      );
+                                    }
                                     return CustomButton(
                                       content: Text(
                                         languageProvider.isEnglish
@@ -230,7 +250,6 @@ class CustomPopUp {
                                         ),
                                       ),
                                       onPressed: () {
-                                        AppNavigator.pop(context);
                                         // 🔥 Trigger your bloc or API call here
                                         // Example:
                                         debugPrint(

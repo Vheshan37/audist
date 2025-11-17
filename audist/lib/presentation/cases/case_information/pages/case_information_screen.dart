@@ -273,16 +273,18 @@ class _CaseInformationScreenState extends State<CaseInformationScreen> {
           debugPrint("Person 1 set to pending");
           respondent.person1 = "pending";
         }
+
         if (respondent.person2 == "None") {
           debugPrint("Person 2 set to pending");
           respondent.person2 = "pending";
         }
+
         if (respondent.person3 == "None") {
           debugPrint("Person 3 set to pending");
           respondent.person3 = "pending";
         }
 
-        final dateFormat = DateFormat('dd/MM/yyyy');
+        final dateFormat = DateFormat('yyyy-MM-dd');
         DateTime? parsedNextCaseDate;
         try {
           parsedNextCaseDate = dateFormat.parseStrict(
@@ -469,6 +471,7 @@ class _CaseInformationScreenState extends State<CaseInformationScreen> {
               child: Custominput(
                 textEditingController: todaysPaymentController,
                 name: '',
+                digitsOnly: true,
               ),
             ),
           ],
@@ -481,6 +484,7 @@ class _CaseInformationScreenState extends State<CaseInformationScreen> {
               child: Custominput(
                 textEditingController: installmentController,
                 name: '',
+                digitsOnly: true,
               ),
             ),
           ],
@@ -495,7 +499,7 @@ class _CaseInformationScreenState extends State<CaseInformationScreen> {
               flex: 3,
               child: CustomDatePicker(
                 textEditingController: nextCaseDateController,
-                name: 'DD/MM/YYYY',
+                name: 'YYYY-MM-DD',
               ),
             ),
           ],
@@ -515,7 +519,7 @@ class _CaseInformationScreenState extends State<CaseInformationScreen> {
         SizedBox(height: AppSizes.spacingSmall),
         CustomDatePicker(
           textEditingController: datePickerController,
-          name: "DD/MM/YYYY",
+          name: "YYYY-MM-DD",
           initialDate:
               caseInformation?.caseInformationResponseCase?.date ??
               DateTime.now(),
@@ -651,7 +655,7 @@ class _CaseInformationScreenState extends State<CaseInformationScreen> {
     final imageProvider = context.read<ImagePickerProvider>();
 
     // Debug: Print what we're receiving
-    debugPrint("Respondent data: ${response.respondent?.toJson()}");
+    debugPrint("Respondent data for Case Information: ${response.respondent?.toJson()}");
 
     // Populate checkboxes - fix the mapping between API status and checkbox types
     if (response.respondent != null) {
@@ -680,7 +684,7 @@ class _CaseInformationScreenState extends State<CaseInformationScreen> {
     // );
 
     // Populate text fields
-    final dateFormat = DateFormat('dd/MM/yyyy');
+    final dateFormat = DateFormat('yyyy-MM-dd');
 
     todaysPaymentController.text = response.payments.isNotEmpty
         ? response.payments.last.payment?.toString() ?? ''

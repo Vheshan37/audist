@@ -13,6 +13,7 @@ import 'package:audist/domain/cases/usecase/fetch_case_information_usecase.dart'
 import 'package:audist/domain/cases/usecase/fetch_case_payment_usecase.dart';
 import 'package:audist/domain/cases/usecase/update_case_information_usecase.dart';
 import 'package:audist/providers/case_information_provider.dart';
+import 'package:audist/providers/payment_information_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
@@ -47,4 +48,5 @@ Future<void> initializeDependencies() async {
 
   // providers
   sl.registerSingleton<CaseInformationProvider>(CaseInformationProvider());
+  sl.registerSingleton<PaymentInformationProvider>(PaymentInformationProvider());
 }

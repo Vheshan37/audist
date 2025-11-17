@@ -9,14 +9,17 @@ import 'package:audist/common/widgets/custom_text_area.dart';
 import 'package:audist/common/widgets/drawer.dart';
 import 'package:audist/core/color.dart';
 import 'package:audist/core/model/add_payment/add_payment_request_model.dart';
+import 'package:audist/core/model/case_information/case_Information_response_model.dart';
 import 'package:audist/core/model/fetch_payment/fetch_payment_request.dart';
 import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
 import 'package:audist/domain/cases/entities/case_entity.dart';
 import 'package:audist/presentation/payments/add_payment/blocs/add_payment/add_payment_bloc.dart';
 import 'package:audist/presentation/payments/add_payment/blocs/fetch_payment/fetch_payment_bloc.dart';
+import 'package:audist/providers/case_information_provider.dart';
 import 'package:audist/providers/common_data_provider.dart';
 import 'package:audist/providers/language_provider.dart';
+import 'package:audist/providers/payment_information_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -165,14 +168,21 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
               horizontal: AppSizes.paddingMedium,
               vertical: AppSizes.paddingMedium,
             ),
-            child: Form(key: formKey, child: _formFields(context, formKey)),
+            child: Form(
+              key: formKey,
+              child: _formFields(context, formKey, language),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _formFields(BuildContext context, GlobalKey<FormState> formKey) {
+  Widget _formFields(
+    BuildContext context,
+    GlobalKey<FormState> formKey,
+    LanguageProvider language,
+  ) {
     return Column(
       spacing: AppSizes.spacingSmall,
       children: [
@@ -198,6 +208,44 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
                       title: "Case Details Retrieved",
                       description:
                           "Payment information has been successfully loaded.",
+                    );
+
+                    CaseEntity caseEntity = CaseEntity.fromJson(
+                      state.data.fetchPaymentResponseCase!.toJson(),
+                    );
+
+                    _loadData(caseEntity);
+
+                    context.read<PaymentInformationProvider>().setCaseID(
+                      caseEntity.refereeNo,
+                    );
+                    context.read<PaymentInformationProvider>().setCaseName(
+                      caseEntity.name,
+                    );
+                    context
+                        .read<PaymentInformationProvider>()
+                        .setCaseOrganization(caseEntity.organization);
+                    context.read<PaymentInformationProvider>().setCaseValue(
+                      NumberFormat.currency(
+                        locale: 'en_US',
+                        symbol: 'Rs.',
+                      ).format(caseEntity.value),
+                    );
+
+                    context.read<PaymentInformationProvider>().setDueAmount(
+                      ConverterHelper.formatCurrency(
+                        ConverterHelper.objectToDouble(
+                          state.data.fetchPaymentResponseCase?.remaining,
+                        ),
+                      ),
+                    );
+
+                    context.read<PaymentInformationProvider>().setPaidAmount(
+                      ConverterHelper.formatCurrency(
+                        ConverterHelper.objectToDouble(
+                          state.data.fetchPaymentResponseCase?.totalPaid,
+                        ),
+                      ),
                     );
 
                     paidAmountController.text = ConverterHelper.formatCurrency(
@@ -265,156 +313,145 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
           ],
         ),
 
-        // * 2nd row
+        // Consumer<PaymentInformationProvider>(
+        //   builder: (context, paymentInformation, child) => SizedBox(
+        //     width: double.infinity,
+        //     child: Column(
+        //       crossAxisAlignment: CrossAxisAlignment.start,
+        //       children: [
+        //         Text(
+        //           language.isEnglish ? "Case Information:" : "නඩු තොරතුරු:",
+        //           style: TextStyle(
+        //             fontSize: AppSizes.titleSmall,
+        //             fontWeight: FontWeight.w500,
+        //           ),
+        //         ),
+        //         Divider(),
+        //         Row(
+        //           spacing: AppSizes.spacingSmall,
+        //           children: [
+        //             Text('${Strings.addPayment.id} :'),
+        //             Text(paymentInformation.caseID ?? "N/A"),
+        //           ],
+        //         ),
+        //         Row(
+        //           spacing: AppSizes.spacingSmall,
+        //           children: [
+        //             Text('${Strings.addPayment.name} :'),
+        //             Text(paymentInformation.caseName ?? "N/A"),
+        //           ],
+        //         ),
+        //         Row(
+        //           spacing: AppSizes.spacingSmall,
+        //           children: [
+        //             Text('${Strings.addPayment.organization} :'),
+        //             Text(paymentInformation.caseOrganization ?? "N/A"),
+        //           ],
+        //         ),
+        //         Row(
+        //           spacing: AppSizes.spacingSmall,
+        //           children: [
+        //             Text('${Strings.addPayment.value} :'),
+        //             Text(paymentInformation.caseValue ?? "N/A"),
+        //           ],
+        //         ),
+        //       ],
+        //     ),
+        //   ),
+        // ),
+        Consumer<PaymentInformationProvider>(
+          builder: (context, paymentInformation, child) => Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: EdgeInsets.symmetric(vertical: AppSizes.spacingMedium),
+            color: AppColors.backgroundLight,
+            child: Padding(
+              padding: EdgeInsets.all(AppSizes.paddingMedium),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    language.isEnglish ? "Case Information" : "නඩු තොරතුරු",
+                    style: TextStyle(
+                      fontSize: AppSizes.titleMedium,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.brandDark,
+                    ),
+                  ),
+                  SizedBox(height: AppSizes.spacingSmall),
+                  Divider(color: Colors.grey.shade300, thickness: 1),
+                  SizedBox(height: AppSizes.spacingSmall),
+
+                  _infoRow(Strings.addPayment.id, paymentInformation.caseID),
+                  _infoRow(
+                    Strings.addPayment.name,
+                    paymentInformation.caseName,
+                  ),
+                  _infoRow(
+                    Strings.addPayment.organization,
+                    paymentInformation.caseOrganization,
+                  ),
+                  _infoRow(
+                    Strings.addPayment.value,
+                    paymentInformation.caseValue,
+                  ),
+                  Divider(color: Colors.grey.shade300, thickness: 1),
+                  _infoRow(
+                    Strings.addPayment.paidAmount,
+                    paymentInformation.paidAmount,
+                  ),
+                  _infoRow(
+                    Strings.addPayment.dueAmount,
+                    paymentInformation.dueAmount,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
         Custominput(
-          textEditingController: idController,
-          name: Strings.addPayment.id,
+          textEditingController: amountController,
+          name: 'Payment Amount',
+          digitsOnly: true,
+          validatorFunction: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Amount is required';
+            }
+
+            final number = double.tryParse(value);
+
+            if (number == null) {
+              return 'Enter a valid number';
+            }
+
+            return null;
+          },
+        ),
+
+        Custominput(
+          textEditingController: balanceController,
+          name: Strings.addPayment.balance,
           enabled: false,
         ),
 
-        // * 2nd row
-        Custominput(
-          textEditingController: nameController,
-          name: Strings.addPayment.name,
-          enabled: false,
-        ),
+        CustomDatePicker(
+          textEditingController: dateController,
+          name: Strings.addPayment.nextDate,
+          validatorFunction: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Next payment date is required';
+            }
 
-        // * 2nd row
-        Custominput(
-          textEditingController: organizationController,
-          name: Strings.addPayment.organization,
-          enabled: false,
-        ),
+            // Check if it contains placeholder year
+            if (value.contains('YYYY')) {
+              return 'Please select a valid date';
+            }
 
-        // * 2nd row
-        Custominput(
-          textEditingController: valueController,
-          name: Strings.addPayment.value,
-          enabled: false,
-        ),
-
-        Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Text(
-                Strings.addPayment.paidAmount,
-                style: TextStyle(fontSize: AppSizes.bodyLarge),
-              ),
-            ),
-            Expanded(
-              flex: 3,
-              child: Custominput(
-                textEditingController: paidAmountController,
-                name: 'Rs. 0.00',
-                enabled: false,
-              ),
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Text(
-                Strings.addPayment.dueAmount,
-                style: TextStyle(fontSize: AppSizes.bodyLarge),
-              ),
-            ),
-            Expanded(
-              flex: 3,
-              child: Custominput(
-                textEditingController: payableAmountController,
-                name: 'Rs. 0.00',
-                enabled: false,
-              ),
-            ),
-          ],
-        ),
-
-        Divider(),
-
-        Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Text(
-                Strings.addPayment.amount,
-                style: TextStyle(fontSize: AppSizes.bodyLarge),
-              ),
-            ),
-            Expanded(
-              flex: 3,
-              child: Custominput(
-                textEditingController: amountController,
-                name: 'Rs. 0.00',
-                validatorFunction: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Amount is required';
-                  }
-
-                  final number = double.tryParse(value);
-
-                  if (number == null) {
-                    return 'Enter a valid number';
-                  }
-
-                  return null;
-                },
-              ),
-            ),
-          ],
-        ),
-
-        Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Text(
-                Strings.addPayment.balance,
-                style: TextStyle(fontSize: AppSizes.bodyLarge),
-              ),
-            ),
-            Expanded(
-              flex: 3,
-              child: Custominput(
-                textEditingController: balanceController,
-                name: 'Rs. 0.00',
-                enabled: false,
-              ),
-            ),
-          ],
-        ),
-
-        Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Text(
-                Strings.addPayment.paymentDate,
-                style: TextStyle(fontSize: AppSizes.bodyLarge),
-              ),
-            ),
-            Expanded(
-              flex: 3,
-              child: CustomDatePicker(
-                textEditingController: dateController,
-                name: 'DD/MM/YYYY',
-                validatorFunction: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Next payment date is required';
-                  }
-
-                  // Check if it contains placeholder year
-                  if (value.contains('YYYY')) {
-                    return 'Please select a valid date';
-                  }
-
-                  return null;
-                },
-              ),
-            ),
-          ],
+            return null;
+          },
         ),
 
         Column(
@@ -491,6 +528,35 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
           },
         ),
       ],
+    );
+  }
+
+  Widget _infoRow(String label, String? value) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: AppSizes.spacingSmall),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 120, // Fixed width for labels
+            child: Text(
+              '$label:',
+              style: TextStyle(
+                fontWeight: FontWeight.w400,
+                color: AppColors.surfaceDark,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value ?? "N/A",
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: AppColors.brandDark,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

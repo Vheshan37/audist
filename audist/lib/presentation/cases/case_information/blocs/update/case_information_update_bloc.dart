@@ -2,6 +2,7 @@ import 'package:audist/core/model/case_information/case_information_request_mode
 import 'package:audist/domain/cases/usecase/update_case_information_usecase.dart';
 import 'package:audist/service_locator.dart';
 import 'package:bloc/bloc.dart';
+import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
 part 'case_information_update_event.dart';
@@ -12,17 +13,21 @@ class CaseInformationUpdateBloc
   CaseInformationUpdateBloc() : super(CaseInformationUpdateInitial()) {
     on<RequestCaseInformationUpdate>((event, emit) async {
       emit(CaseInformationUpdateLoading());
+      debugPrint('Case Information Update Requested');
 
       final response = await sl<UpdateCaseInformationUseCase>().call(
         request: event.request,
       );
+      debugPrint('Case Information Update Response Received');
 
       response.fold(
         ((err) {
           emit(CaseInformationUpdateFailed(message: err.message));
+          debugPrint('Case Information Update Failed: ${err.message}');
         }),
         ((data) {
           emit(CaseInformationUpdateSuccess());
+          debugPrint('Case Information Update Success');
         }),
       );
     });

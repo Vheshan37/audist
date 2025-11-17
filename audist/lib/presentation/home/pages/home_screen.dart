@@ -368,7 +368,11 @@ class HomeScreen extends StatelessWidget {
                               Icon(item['icon'], color: AppColors.brandAccent),
                               Text(
                                 item['title'],
-                                style: TextStyle(color: AppColors.brandAccent),
+                                style: TextStyle(
+                                  color: AppColors.brandAccent,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: AppSizes.bodyMedium
+                                ),
                               ),
                             ],
                           ),

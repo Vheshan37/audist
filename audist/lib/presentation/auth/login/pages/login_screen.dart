@@ -18,7 +18,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
     TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
 
@@ -123,7 +123,7 @@ class LoginScreen extends StatelessWidget {
 
                         // * Login form
                         Form(
-                          key: _formKey,
+                          key: formKey,
                           child: Column(
                             spacing: AppSizes.spacingMedium,
                             children: [
@@ -171,7 +171,7 @@ class LoginScreen extends StatelessWidget {
                                   }else if(state is LoginEmailSended){
                                     AppAlert.show(
                                       context,
-                                      type: AlertType.error,
+                                      type: AlertType.info,
                                       title: "Verify your email",
                                       description: state.message,
                                     );
@@ -206,7 +206,7 @@ class LoginScreen extends StatelessWidget {
                                       ),
                                     ),
                                     onPressed: () {
-                                      if (_formKey.currentState!.validate()) {
+                                      if (formKey.currentState!.validate()) {
                                         context.read<LoginBloc>().add(
                                           RequestLogin(
                                             emailController.text.trim(),

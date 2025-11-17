@@ -115,6 +115,8 @@ class AddPayment {
   String get paidAmount => _isEnglish ? "Paid Amount" : "ගෙවා ඇති මුදල";
   String get dueAmount => _isEnglish ? "Due Amount" : "ගෙවිය යුතු මුදල";
 
+  String get nextDate => _isEnglish ? "Next Date" : "ඉදිරි දිනය";
+
   String get paymentDate => _isEnglish ? "Next payment date" : "ඉදිරි ගෙවීම් දිනය";
   String get amount => _isEnglish ? "Amount" : "අයවීම් මුදල";
   String get balance => _isEnglish ? "Balance" : "ශේෂය";

@@ -18,6 +18,7 @@ import 'package:audist/providers/case_information_provider.dart';
 import 'package:audist/providers/common_data_provider.dart';
 import 'package:audist/providers/image_picker_provider.dart';
 import 'package:audist/providers/language_provider.dart';
+import 'package:audist/providers/payment_information_provider.dart';
 import 'package:audist/service_locator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -42,6 +43,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => CaseFilterProvider()),
         ChangeNotifierProvider(create: (context) => CommonDataProvider()),
         ChangeNotifierProvider(create: (context) => CaseInformationProvider()),
+        ChangeNotifierProvider(create: (context) => PaymentInformationProvider()),
       ],
       child: GestureDetector(
         onLongPress: () {

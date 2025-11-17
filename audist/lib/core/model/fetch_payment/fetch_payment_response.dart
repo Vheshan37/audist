@@ -92,12 +92,14 @@ class CashCollection {
     required this.payment,
     required this.collectionDate,
     required this.remainingAfterPayment,
+    required this.description,
   });
 
   final int? id;
   final int? payment;
   final DateTime? collectionDate;
   final int? remainingAfterPayment;
+  final String? description;
 
   factory CashCollection.fromJson(Map<String, dynamic> json) {
     return CashCollection(
@@ -105,6 +107,7 @@ class CashCollection {
       payment: json["payment"],
       collectionDate: DateTime.tryParse(json["collection_date"] ?? ""),
       remainingAfterPayment: json["remaining_after_payment"],
+      description: json["description"],
     );
   }
 
@@ -113,6 +116,7 @@ class CashCollection {
     "payment": payment,
     "collection_date": collectionDate?.toIso8601String(),
     "remaining_after_payment": remainingAfterPayment,
+    "description": description,
   };
 }
 

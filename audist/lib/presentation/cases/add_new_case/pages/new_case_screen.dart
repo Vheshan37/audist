@@ -170,6 +170,7 @@ class _NewCaseScreenState extends State<NewCaseScreen> {
         Custominput(
           textEditingController: valueController,
           name: Strings.newCase.value,
+          digitsOnly: true,
           validatorFunction: (value) {
             if (value == null || value.isEmpty) {
               return language.isEnglish

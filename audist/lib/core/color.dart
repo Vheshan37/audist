@@ -53,7 +53,7 @@ class AppColors {
     end: Alignment.bottomRight,
   );
 
-  static const Gradient highlighGradient = LinearGradient(
+  static const Gradient highlightGradient = LinearGradient(
     colors: [backgroundLight, backgroundMuted],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,

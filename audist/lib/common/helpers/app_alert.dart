@@ -1,3 +1,4 @@
+import 'package:audist/core/sizes.dart';
 import 'package:flutter/material.dart';
 
 enum AlertType { success, error, warning, info }
@@ -110,13 +111,13 @@ class _TopAlertBannerState extends State<_TopAlertBanner>
   Color get borderColor {
     switch (widget.type) {
       case AlertType.success:
-        return Colors.greenAccent;
+        return const Color(0xFFAAFFDB);
       case AlertType.error:
-        return Colors.redAccent;
+        return const Color(0xFFFFAAAA);
       case AlertType.warning:
-        return Colors.amber;
+        return const Color(0xFFFFE8AA);
       case AlertType.info:
-        return Colors.blueAccent;
+        return const Color(0xFFAACBFF);
     }
   }
 
@@ -173,7 +174,8 @@ class _TopAlertBannerState extends State<_TopAlertBanner>
                           widget.title,
                           style: TextStyle(
                             color: borderColor,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w900,
+                            fontSize: AppSizes.bodyLarge
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -182,6 +184,7 @@ class _TopAlertBannerState extends State<_TopAlertBanner>
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 13,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
