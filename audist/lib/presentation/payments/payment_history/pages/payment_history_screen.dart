@@ -259,7 +259,7 @@ class PaymentHistoryScreen extends StatelessWidget {
                       return;
                     }
 
-                    await generateLedgerPDF(collection);
+                    await generateLoanLedgerPDF();
 
                     AppAlert.show(
                       context,

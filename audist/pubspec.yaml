@@ -87,6 +87,10 @@ flutter:
     - assets/images/
     - assets/fonts/NotoSans-Bold.ttf
     - assets/fonts/NotoSans-Regular.ttf
+    - assets/fonts/NotoSansSinhala-Bold.ttf
+    - assets/fonts/NotoSansSinhala-Regular.ttf
+    - assets/fonts/AbhayaLibre-Bold.ttf
+    - assets/fonts/AbhayaLibre-Regular.ttf
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -8,6 +8,7 @@ import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
 import 'package:audist/presentation/auth/login/bloc/login_bloc.dart';
 import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
+import 'package:audist/providers/common_data_provider.dart';
 import 'package:audist/providers/language_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -165,10 +166,16 @@ class LoginScreen extends StatelessWidget {
                                     context.read<FetchCaseBloc>().add(
                                       RequestFetchCase(uid: state.userId!),
                                     );
+                                    context.read<FetchCaseBloc>().add(
+                                      RequestFetchCase(uid: state.userId!),
+                                    );
+                                    context.read<CommonDataProvider>().saveUser(
+                                      state.userId!,
+                                    );
                                     AppNavigator.pushReplacement(
                                       AppRoutes.home,
                                     );
-                                  }else if(state is LoginEmailSended){
+                                  } else if (state is LoginEmailSended) {
                                     AppAlert.show(
                                       context,
                                       type: AlertType.info,
