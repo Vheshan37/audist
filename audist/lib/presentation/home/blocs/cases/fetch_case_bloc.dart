@@ -43,5 +43,23 @@ class FetchCaseBloc extends Bloc<FetchCaseEvent, FetchCaseState> {
         },
       );
     });
+    on<FilterCasesByDate>((event, emit) async {
+      emit(FetchCaseLoading());
+
+      List<CaseEntity> filteredList = event.list
+          .where(
+            (caseItem) =>
+                caseItem.caseDate?.year == event.selectedDate.year &&
+                caseItem.caseDate?.month == event.selectedDate.month &&
+                caseItem.caseDate?.day == event.selectedDate.day,
+          )
+          .toList();
+
+      emit(
+        FilteredCasesByDate(
+          caseList: filteredList,
+        ),
+      );
+    });
   }
 }

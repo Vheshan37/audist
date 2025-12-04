@@ -12,6 +12,7 @@ import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
 import 'package:audist/domain/cases/entities/case_entity.dart';
 import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
+import 'package:audist/providers/common_data_provider.dart';
 import 'package:audist/providers/language_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,10 +35,25 @@ class NextCasesScreen extends StatelessWidget {
             child: Column(
               children: [
                 // * 1st row date picker
-                BlocBuilder<FetchCaseBloc, FetchCaseState>(
+                BlocConsumer<FetchCaseBloc, FetchCaseState>(
+                  listener: (context, state) => {
+                    if (state is FetchCaseLoaded)
+                      {
+                        context.read<CommonDataProvider>().modifyCaseList(
+                          state.caseList,
+                        ),
+                      },
+                  },
                   builder: (context, state) {
                     List<CaseEntity> list = [];
                     if (state is FetchCaseLoaded) {
+                      list = state.caseList;
+                    }
+
+                    if (state is FilteredCasesByDate) {
+                      debugPrint("Filtered List: ${state.caseList[0].name}");
+                      debugPrint("Filtered List: ${state.caseList[0].caseDate}");
+                      debugPrint("Filtered List Length: ${state.caseList.length}");
                       list = state.caseList;
                     }
 
@@ -49,6 +65,14 @@ class NextCasesScreen extends StatelessWidget {
                             child: CustomDatePicker(
                               textEditingController: dateController,
                               name: 'DD/MM/YYYY',
+                              onDateSelected: (date) {
+                                context.read<FetchCaseBloc>().add(
+                                  FilterCasesByDate(
+                                    selectedDate: date,
+                                    list: list,
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ],
@@ -120,8 +144,11 @@ class NextCasesScreen extends StatelessWidget {
                               PopUp(
                                 isNextCase: true,
                                 caseInformation: list[index],
-                                caseType: context.read<LanguageProvider>().isEnglish ? "Pending Case" : "ඉදිරි නඩුවක්",
-                                caseStatus: "pending"
+                                caseType:
+                                    context.read<LanguageProvider>().isEnglish
+                                    ? "Pending Case"
+                                    : "ඉදිරි නඩුවක්",
+                                caseStatus: "pending",
                               ).openPopUp(context);
                             },
                             child: Container(

@@ -14,6 +14,12 @@ class FetchCaseLoaded extends FetchCaseState {
   FetchCaseLoaded({required this.caseList, this.todayCount, this.totalCount});
 }
 
+class FilteredCasesByDate extends FetchCaseState {
+  final List<CaseEntity> caseList;
+
+  FilteredCasesByDate({required this.caseList});
+}
+
 class FetchCaseFailed extends FetchCaseState {
   final String message;
 
