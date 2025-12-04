@@ -43,6 +43,8 @@ class FetchCaseBloc extends Bloc<FetchCaseEvent, FetchCaseState> {
         },
       );
     });
+
+
     on<FilterCasesByDate>((event, emit) async {
       emit(FetchCaseLoading());
 

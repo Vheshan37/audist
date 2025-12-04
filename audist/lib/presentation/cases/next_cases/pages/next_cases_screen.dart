@@ -48,12 +48,7 @@ class NextCasesScreen extends StatelessWidget {
                     List<CaseEntity> list = [];
                     if (state is FetchCaseLoaded) {
                       list = state.caseList;
-                    }
-
-                    if (state is FilteredCasesByDate) {
-                      debugPrint("Filtered List: ${state.caseList[0].name}");
-                      debugPrint("Filtered List: ${state.caseList[0].caseDate}");
-                      debugPrint("Filtered List Length: ${state.caseList.length}");
+                    } else if (state is FilteredCasesByDate) {
                       list = state.caseList;
                     }
 
@@ -99,6 +94,11 @@ class NextCasesScreen extends StatelessWidget {
                       builder: (context, state) {
                         List<CaseEntity> list = [];
                         if (state is FetchCaseLoaded) {
+                          list = state.caseList;
+                        } else if (state is FilteredCasesByDate) {
+                          debugPrint(
+                            "Filtered List Length: ${state.caseList.length}",
+                          );
                           list = state.caseList;
                         }
 
