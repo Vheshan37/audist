@@ -2,6 +2,9 @@ const { PrismaClient } = require("@prisma/client");
 const { payment } = require("../payment/getPayments.js");
 const prisma = new PrismaClient();
 
+const PDFDocument = require("pdfkit");
+// const { prisma } = require("../path/to/prisma"); // adjust path
+
 
 
 const caseWithCaseNumb = async (req, res) => {
@@ -185,9 +188,158 @@ const addPayment = async (req, res) => {
     console.error("Error adding payment:", err);
     res.status(500).json({ error: err.message });
   }
+
+
 };
 
 
 
 
-module.exports = { caseWithCaseNumb, addPayment };
+// Helper function to fetch ledger data
+const fetchLedgerData = async (caseNumb, userID) => {
+  const caseData = await prisma.cases.findFirst({
+    where: {
+      case_number: caseNumb,
+      user_id: userID,
+    },
+    include: {
+      user: { include: { division: true } },
+      case_status: true,
+      cash_collection: { orderBy: { id: "asc" } },
+    },
+  });
+
+  if (!caseData) return null;
+
+  let runningTotal = 0;
+  const ledger = caseData.cash_collection.map((pay) => {
+    runningTotal += pay.payment;
+    return {
+      date: pay.collection_date,
+      description: pay.description || "-",
+      payment: pay.payment,
+      remaining: caseData.value - runningTotal,
+    };
+  });
+
+  return {
+    case_number: caseData.case_number,
+    referee_no: caseData.referee_no,
+    name: caseData.name,
+    organization: caseData.organization,
+    case_value: caseData.value,
+    status: caseData.case_status.status,
+    officer: {
+      name: caseData.user.name,
+      division: caseData.user.division.division,
+    },
+    ledger,
+    totals: {
+      total_paid: runningTotal,
+      remaining_amount: caseData.value - runningTotal,
+    },
+  };
+};
+
+// Main API
+const generateLoanLedgerPDF = async (req, res) => {
+  const { caseNumb, userID } = req.body;
+
+  if (!caseNumb || !userID) {
+    return res.status(400).json({ error: "caseNumb and userID are required" });
+  }
+
+  try {
+    const data = await fetchLedgerData(caseNumb, userID);
+    if (!data) return res.status(404).json({ error: "Case not found" });
+
+    const doc = new PDFDocument({ size: "A4", margin: 50 });
+    let buffers = [];
+    doc.on("data", buffers.push.bind(buffers));
+    doc.on("end", () => {
+      const pdfData = Buffer.concat(buffers);
+      res.writeHead(200, {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename=LoanLedger_${caseNumb}.pdf`,
+        "Content-Length": pdfData.length,
+      });
+      res.end(pdfData);
+    });
+
+    // ----------------------------
+    // TITLE
+    // ----------------------------
+    doc.fontSize(20).text("LOAN LEDGER", { align: "center", underline: true });
+    doc.moveDown(1);
+
+    // ----------------------------
+    // CASE DETAILS (left) & VALUE INFO (right)
+    // ----------------------------
+    const startX = doc.x;
+    doc.fontSize(12);
+
+    // Left
+    doc.text(`Case Number: ${data.case_number}`, { continued: true, width: 250 });
+    doc.text(`Case Value: Rs. ${data.case_value}`, { align: "right" });
+    doc.text(`Referee No: ${data.referee_no}`, { continued: true, width: 250 });
+    doc.text(`Installment Value: Rs. -`, { align: "right" }); // Replace '-' with actual installment if you have
+    doc.text(`Name: ${data.name}`, { continued: true, width: 250 });
+    doc.text(``, { align: "right" });
+    doc.text(`Organization: ${data.organization}`, { continued: true, width: 250 });
+    doc.text(``, { align: "right" });
+    doc.moveDown(1);
+
+    // ----------------------------
+    // PAYMENT HISTORY TABLE
+    // ----------------------------
+    doc.fontSize(14).text("Payment History", { underline: true });
+    doc.moveDown(0.5);
+
+    // Table Header
+    doc.fontSize(12).text("Date", startX, doc.y, { width: 100, bold: true });
+    doc.text("Description", startX + 100, doc.y, { width: 200 });
+    doc.text("Payment (Rs.)", startX + 300, doc.y, { width: 100, align: "right" });
+    doc.text("Remaining (Rs.)", startX + 400, doc.y, { width: 100, align: "right" });
+    doc.moveDown(0.5);
+
+    // Divider
+    doc.moveTo(startX, doc.y).lineTo(500, doc.y).stroke();
+    doc.moveDown(0.2);
+
+    // Table Rows
+    data.ledger.forEach((row) => {
+      doc.text(new Date(row.date).toLocaleDateString(), startX, doc.y, { width: 100 });
+      doc.text(row.description, startX + 100, doc.y, { width: 200 });
+      doc.text(row.payment.toFixed(2), startX + 300, doc.y, { width: 100, align: "right" });
+      doc.text(row.remaining.toFixed(2), startX + 400, doc.y, { width: 100, align: "right" });
+      doc.moveDown(0.5);
+    });
+
+    doc.moveDown(2);
+
+    // ----------------------------
+    // TOTALS
+    // ----------------------------
+    doc.fontSize(12).text(`Total Paid: Rs. ${data.totals.total_paid.toFixed(2)}`);
+    doc.text(`Remaining Balance: Rs. ${data.totals.remaining_amount.toFixed(2)}`);
+    doc.moveDown(3);
+
+    // ----------------------------
+    // COPYRIGHT
+    // ----------------------------
+    doc.fontSize(10).text(
+      "© 2025 Techknow Lanka Engineers (Pvt) Ltd. All rights reserved.",
+      { align: "center" }
+    );
+
+    doc.end();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to generate PDF" });
+  }
+};
+
+
+
+
+module.exports = { caseWithCaseNumb, addPayment , generateLoanLedgerPDF};
