@@ -6,6 +6,7 @@ import 'package:audist/presentation/auth/login/bloc/login_bloc.dart';
 import 'package:audist/presentation/cases/add_new_case/blocs/add_case/add_case_bloc.dart';
 import 'package:audist/presentation/cases/case_information/blocs/details/case_information_detail_bloc.dart';
 import 'package:audist/presentation/cases/case_information/blocs/update/case_information_update_bloc.dart';
+import 'package:audist/presentation/cases/next_cases/bloc/filter_next_case_bloc.dart';
 import 'package:audist/presentation/home/blocs/allcase/all_case_bloc.dart';
 import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
 import 'package:audist/presentation/payments/add_payment/blocs/add_payment/add_payment_bloc.dart';
@@ -60,6 +61,7 @@ void main() async {
             BlocProvider(create: (context) => CaseInformationDetailBloc()),
             BlocProvider(create: (context) => AddPaymentBloc()),
             BlocProvider(create: (context) => FetchPaymentBloc()),
+            BlocProvider(create: (context) => FilterNextCaseBloc()),
           ],
           child: const MyApp(),
         ),

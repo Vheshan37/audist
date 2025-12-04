@@ -11,6 +11,7 @@ class CustomDatePicker extends StatelessWidget {
   final DateTime? lastDate;
   final DateTime? initialDate;
   final String dateFormat;
+  final Function(DateTime)? onDateSelected;
 
   const CustomDatePicker({
     super.key,
@@ -21,12 +22,13 @@ class CustomDatePicker extends StatelessWidget {
     this.lastDate,
     this.initialDate,
     this.dateFormat = 'yyyy-MM-dd',
+    this.onDateSelected,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0), // consistent spacing
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
         controller: textEditingController,
         readOnly: true, // Prevent keyboard input
@@ -37,10 +39,7 @@ class CustomDatePicker extends StatelessWidget {
           label: Text(name, style: TextStyle(color: AppColors.darkGreyColor)),
           hintText: "Hello",
           contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-          suffixIcon: Icon(
-            Icons.calendar_today,
-            color: AppColors.brandAccent,
-          ),
+          suffixIcon: Icon(Icons.calendar_today, color: AppColors.brandAccent),
           border: OutlineInputBorder(
             borderSide: BorderSide(color: AppColors.brandAccent),
           ),
@@ -70,21 +69,43 @@ class CustomDatePicker extends StatelessWidget {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: initialDate ?? DateTime.now(),
-      firstDate: firstDate ?? DateTime.now().subtract(Duration(days: 1)),
+      // firstDate: firstDate ?? DateTime.now().subtract(Duration(days: 1)),
+      firstDate: firstDate ?? DateTime(2000),
       lastDate: lastDate ?? DateTime.now().add(Duration(days: 365 * 2)),
+      // builder: (context, child) {
+      //   return Theme(
+      //     data: Theme.of(context).copyWith(
+      //       colorScheme: ColorScheme.light(
+      //         primary: AppColors.primaryColor,
+      //         onPrimary: Colors.white,
+      //         surface: Colors.white,
+      //         onSurface: AppColors.darkGreyColor,
+      //       ),
+      //       textButtonTheme: TextButtonThemeData(
+      //         style: TextButton.styleFrom(
+      //           foregroundColor: AppColors.primaryColor,
+      //         ),
+      //       ),
+      //     ),
+      //     child: child!,
+      //   );
+      // },
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: AppColors.primaryColor,
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: AppColors.darkGreyColor,
+              primary: AppColors.brandAccent, // header + selection
+              onPrimary: Colors.white, // text on selected date
+              surface: AppColors.surfaceLight, // background of the calendar
+              onSurface: AppColors.brandDark, // default text color
             ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.primaryColor,
+                foregroundColor: AppColors.brandAccent, // OK / CANCEL buttons
               ),
+            ),
+            dialogTheme: DialogThemeData(
+              backgroundColor: AppColors.surfaceLight,
             ),
           ),
           child: child!,
@@ -94,6 +115,10 @@ class CustomDatePicker extends StatelessWidget {
 
     if (picked != null) {
       textEditingController.text = DateFormat(dateFormat).format(picked);
+
+      if (onDateSelected != null) {
+        onDateSelected!(picked);
+      }
     }
   }
 }

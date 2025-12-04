@@ -43,5 +43,16 @@ class FetchCaseBloc extends Bloc<FetchCaseEvent, FetchCaseState> {
         },
       );
     });
+
+    // on<LoadFullCases>((event, emit) async {
+    //   emit(FetchCaseLoading());
+    //   emit(
+    //     FetchCaseLoaded(
+    //       caseList: event.caseList!,
+    //       todayCount: event.todayCount,
+    //       totalCount: event.totalCount,
+    //     ),
+    //   );
+    // });
   }
 }
