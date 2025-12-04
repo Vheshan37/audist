@@ -7,8 +7,14 @@ class RequestFetchCase extends FetchCaseEvent {
   RequestFetchCase({required this.uid});
 }
 
-class FilterCasesByDate extends FetchCaseEvent {
-  final DateTime selectedDate;
-  final List<CaseEntity> list;
-  FilterCasesByDate({required this.selectedDate, required this.list});
-}
+// class LoadFullCases extends FetchCaseEvent {
+//   final List<CaseEntity>? caseList;
+//   final int? todayCount;
+//   final int? totalCount;
+//
+//   LoadFullCases({
+//     required this.caseList,
+//     required this.todayCount,
+//     required this.totalCount,
+//   });
+// }
