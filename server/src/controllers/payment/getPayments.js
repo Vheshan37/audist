@@ -249,66 +249,156 @@ const fetchLedgerData = async (caseNumb, userID) => {
 const renderLedgerHtml = (data) => {
   return `
   <html>
-    <head>
-      <style>
-        body { font-family: Arial, sans-serif; padding: 30px; }
-        h1 { text-align: center; text-decoration: underline; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; font-size: 12px; }
-        th { background: #f0f0f0; }
-        .details { margin-top: 20px; }
-        .footer { margin-top: 40px; text-align: center; font-size: 10px; color: #666; }
-      </style>
-    </head>
-    <body>
+  <head>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        padding: 40px 45px;
+        color: #222;
+      }
 
-      <h1>LOAN LEDGER</h1>
+      h1 {
+        text-align: center;
+        font-size: 26px;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        border-bottom: 2px solid #333;
+      }
 
-      <div class="details">
-        <p><b>Case Number:</b> ${data.case_number}</p>
-        <p><b>Referee No:</b> ${data.referee_no}</p>
-        <p><b>Name:</b> ${data.name}</p>
-        <p><b>Organization:</b> ${data.organization}</p>
-        <p><b>Case Value:</b> Rs. ${data.case_value.toFixed(2)}</p>
-        <p><b>Officer:</b> ${data.officer.name} (${data.officer.division})</p>
-        <p><b>Status:</b> ${data.status}</p>
+      h3, h4 {
+        margin-top: 30px;
+        margin-bottom: 10px;
+        color: #333;
+        font-weight: 700;
+      }
+
+      /* Details Box */
+      .detailsBox {
+        display: flex;
+        justify-content: space-between;
+        gap: 40px;
+        margin-top: 25px;
+        flex-wrap: wrap;
+      }
+
+      .detailsBox div {
+        flex: 1 1 260px;
+      }
+
+      .detailsBox p {
+        margin: 8px 0;
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+      }
+
+      .detailsBox b {
+        min-width: 140px;
+        font-weight: 700;
+      }
+
+      .value {
+        font-weight: 500;
+      }
+
+      /* Table */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 13px;
+      }
+
+      th {
+        background: #e8e8e8;
+        padding: 10px;
+        border: 1px solid #ccc;
+        text-align: center;
+        font-weight: 700;
+      }
+
+      td {
+        padding: 8px;
+        border: 1px solid #ddd;
+      }
+
+      tbody tr:nth-child(even) {
+        background: #fafafa;
+      }
+
+      tbody tr:hover {
+        background: #f3f3f3;
+      }
+
+      td:last-child, td:nth-last-child(2) {
+        text-align: right;
+      }
+
+      /* Footer */
+      .footer {
+        margin-top: 40px;
+        text-align: center;
+        font-size: 11px;
+        color: #666;
+        border-top: 1px solid #ccc;
+        padding-top: 12px;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <h1>LOAN LEDGER</h1>
+
+    <div class="detailsBox">
+      <div>
+        <p><b>නඩු අංකය:</b> <span class="value">${data.case_number}</span></p>
+        <p><b>තීරක අංකය:</b> <span class="value">${data.referee_no}</span></p>
+        <p><b>නම:</b> <span class="value">${data.name}</span></p>
+        <p><b>සමිතිය:</b> <span class="value">${data.organization}</span></p>
       </div>
 
-      <h2>Payment History</h2>
+      <div>
+        <p><b>වටිනාකම:</b> <span class="value">රු. ${data.case_value.toFixed(2)}</span></p>
+        <p><b>ගෙවා අවසන් මුදල:</b> <span class="value">රු. ${data.totals.total_paid.toFixed(2)}</span></p>
+        <p><b>ගෙවීමට ඉතිරි මුදල:</b> <span class="value">රු. ${data.totals.remaining_amount.toFixed(2)}</span></p>
+      </div>
+    </div>
 
-      <table>
-        <thead>
+    <h4>Payment History</h4>
+
+    <table>
+      <thead>
+        <tr>
+          <th>දිනය</th>
+          <th>විස්තරය</th>
+          <th>අයවීම (රු.)</th>
+          <th>ඉතිරි (රු.)</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.ledger
+          .map(
+            (row) => `
           <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Payment (Rs.)</th>
-            <th>Remaining (Rs.)</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${data.ledger
-            .map(
-              (row) => `
-            <tr>
-              <td>${new Date(row.date).toLocaleDateString()}</td>
-              <td>${row.description}</td>
-              <td style="text-align:right;">${row.payment.toFixed(2)}</td>
-              <td style="text-align:right;">${row.remaining.toFixed(2)}</td>
-            </tr>`
-            )
-            .join("")}
-        </tbody>
-      </table>
+            <td>${new Date(row.date).toLocaleDateString()}</td>
+            <td>${row.description}</td>
+            <td>${row.payment.toFixed(2)}</td>
+            <td>${row.remaining.toFixed(2)}</td>
+          </tr>`
+          )
+          .join("")}
+      </tbody>
+    </table>
 
-      <h3>Total Paid: Rs. ${data.totals.total_paid.toFixed(2)}</h3>
-      <h3>Remaining Balance: Rs. ${data.totals.remaining_amount.toFixed(2)}</h3>
+    <div class="footer">
+      © 2025 Techknow Lanka Engineers (Pvt) Ltd. All rights reserved.
+    </div>
 
-      <div class="footer">
-        © 2025 Techknow Lanka Engineers (Pvt) Ltd. All rights reserved.
-      </div>
+  </body>
+</html>
 
-    </body>
-  </html>
   `;
 };
 
