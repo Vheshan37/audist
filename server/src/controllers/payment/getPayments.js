@@ -3,7 +3,7 @@ const { payment } = require("../payment/getPayments.js");
 const prisma = new PrismaClient();
 
 const PDFDocument = require("pdfkit");
-// const { prisma } = require("../path/to/prisma"); // adjust path
+const puppeteer = require("puppeteer");
 
 
 
@@ -195,7 +195,9 @@ const addPayment = async (req, res) => {
 
 
 
-// Helper function to fetch ledger data
+// ----------------------------------------------------
+// Fetch Ledger Data
+// ----------------------------------------------------
 const fetchLedgerData = async (caseNumb, userID) => {
   const caseData = await prisma.cases.findFirst({
     where: {
@@ -241,7 +243,78 @@ const fetchLedgerData = async (caseNumb, userID) => {
   };
 };
 
-// Main API
+// ----------------------------------------------------
+// Create HTML Template
+// ----------------------------------------------------
+const renderLedgerHtml = (data) => {
+  return `
+  <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 30px; }
+        h1 { text-align: center; text-decoration: underline; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; font-size: 12px; }
+        th { background: #f0f0f0; }
+        .details { margin-top: 20px; }
+        .footer { margin-top: 40px; text-align: center; font-size: 10px; color: #666; }
+      </style>
+    </head>
+    <body>
+
+      <h1>LOAN LEDGER</h1>
+
+      <div class="details">
+        <p><b>Case Number:</b> ${data.case_number}</p>
+        <p><b>Referee No:</b> ${data.referee_no}</p>
+        <p><b>Name:</b> ${data.name}</p>
+        <p><b>Organization:</b> ${data.organization}</p>
+        <p><b>Case Value:</b> Rs. ${data.case_value.toFixed(2)}</p>
+        <p><b>Officer:</b> ${data.officer.name} (${data.officer.division})</p>
+        <p><b>Status:</b> ${data.status}</p>
+      </div>
+
+      <h2>Payment History</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Payment (Rs.)</th>
+            <th>Remaining (Rs.)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.ledger
+            .map(
+              (row) => `
+            <tr>
+              <td>${new Date(row.date).toLocaleDateString()}</td>
+              <td>${row.description}</td>
+              <td style="text-align:right;">${row.payment.toFixed(2)}</td>
+              <td style="text-align:right;">${row.remaining.toFixed(2)}</td>
+            </tr>`
+            )
+            .join("")}
+        </tbody>
+      </table>
+
+      <h3>Total Paid: Rs. ${data.totals.total_paid.toFixed(2)}</h3>
+      <h3>Remaining Balance: Rs. ${data.totals.remaining_amount.toFixed(2)}</h3>
+
+      <div class="footer">
+        © 2025 Techknow Lanka Engineers (Pvt) Ltd. All rights reserved.
+      </div>
+
+    </body>
+  </html>
+  `;
+};
+
+// ----------------------------------------------------
+// Main PDF Generator API
+// ----------------------------------------------------
 const generateLoanLedgerPDF = async (req, res) => {
   const { caseNumb, userID } = req.body;
 
@@ -253,89 +326,30 @@ const generateLoanLedgerPDF = async (req, res) => {
     const data = await fetchLedgerData(caseNumb, userID);
     if (!data) return res.status(404).json({ error: "Case not found" });
 
-    const doc = new PDFDocument({ size: "A4", margin: 50 });
-    let buffers = [];
-    doc.on("data", buffers.push.bind(buffers));
-    doc.on("end", () => {
-      const pdfData = Buffer.concat(buffers);
-      res.writeHead(200, {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename=LoanLedger_${caseNumb}.pdf`,
-        "Content-Length": pdfData.length,
-      });
-      res.end(pdfData);
+    const html = renderLedgerHtml(data);
+
+    const browser = await puppeteer.launch({ headless: "new" });
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: "networkidle0" });
+
+    const pdfBuffer = await page.pdf({
+      format: "A4",
+      printBackground: true,
+      margin: { top: "20px", bottom: "20px" },
     });
 
-    // ----------------------------
-    // TITLE
-    // ----------------------------
-    doc.fontSize(20).text("LOAN LEDGER", { align: "center", underline: true });
-    doc.moveDown(1);
+    await browser.close();
 
-    // ----------------------------
-    // CASE DETAILS (left) & VALUE INFO (right)
-    // ----------------------------
-    const startX = doc.x;
-    doc.fontSize(12);
-
-    // Left
-    doc.text(`Case Number: ${data.case_number}`, { continued: true, width: 250 });
-    doc.text(`Case Value: Rs. ${data.case_value}`, { align: "right" });
-    doc.text(`Referee No: ${data.referee_no}`, { continued: true, width: 250 });
-    doc.text(`Installment Value: Rs. -`, { align: "right" }); // Replace '-' with actual installment if you have
-    doc.text(`Name: ${data.name}`, { continued: true, width: 250 });
-    doc.text(``, { align: "right" });
-    doc.text(`Organization: ${data.organization}`, { continued: true, width: 250 });
-    doc.text(``, { align: "right" });
-    doc.moveDown(1);
-
-    // ----------------------------
-    // PAYMENT HISTORY TABLE
-    // ----------------------------
-    doc.fontSize(14).text("Payment History", { underline: true });
-    doc.moveDown(0.5);
-
-    // Table Header
-    doc.fontSize(12).text("Date", startX, doc.y, { width: 100, bold: true });
-    doc.text("Description", startX + 100, doc.y, { width: 200 });
-    doc.text("Payment (Rs.)", startX + 300, doc.y, { width: 100, align: "right" });
-    doc.text("Remaining (Rs.)", startX + 400, doc.y, { width: 100, align: "right" });
-    doc.moveDown(0.5);
-
-    // Divider
-    doc.moveTo(startX, doc.y).lineTo(500, doc.y).stroke();
-    doc.moveDown(0.2);
-
-    // Table Rows
-    data.ledger.forEach((row) => {
-      doc.text(new Date(row.date).toLocaleDateString(), startX, doc.y, { width: 100 });
-      doc.text(row.description, startX + 100, doc.y, { width: 200 });
-      doc.text(row.payment.toFixed(2), startX + 300, doc.y, { width: 100, align: "right" });
-      doc.text(row.remaining.toFixed(2), startX + 400, doc.y, { width: 100, align: "right" });
-      doc.moveDown(0.5);
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename=LoanLedger_${caseNumb}.pdf`,
+      "Content-Length": pdfBuffer.length,
     });
 
-    doc.moveDown(2);
-
-    // ----------------------------
-    // TOTALS
-    // ----------------------------
-    doc.fontSize(12).text(`Total Paid: Rs. ${data.totals.total_paid.toFixed(2)}`);
-    doc.text(`Remaining Balance: Rs. ${data.totals.remaining_amount.toFixed(2)}`);
-    doc.moveDown(3);
-
-    // ----------------------------
-    // COPYRIGHT
-    // ----------------------------
-    doc.fontSize(10).text(
-      "© 2025 Techknow Lanka Engineers (Pvt) Ltd. All rights reserved.",
-      { align: "center" }
-    );
-
-    doc.end();
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to generate PDF" });
+    return res.send(pdfBuffer);
+  } catch (err) {
+    console.error("PDF generation error:", err);
+    return res.status(500).json({ error: "Failed to generate PDF" });
   }
 };
 
