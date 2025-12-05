@@ -164,7 +164,7 @@ class Login {
   String get subTitle => _isEnglish
       ? "Sign in to manage your cases."
       : "ඔබේ නඩු කළමනාකරණය කිරීමට ප්‍රවේශ වන්න";
-  String get emailHint => _isEnglish ? "Username" : "පරිශීලක නාමය";
+  String get emailHint => _isEnglish ? "Email" : "විද්‍යුත් තැපෑල";
   String get passwordHint => _isEnglish ? "Password" : "මුරපදය";
   String get buttonText => _isEnglish ? "Sign In" : "ඇතුල් වන්න";
   String get doNotHaveAccount =>
