@@ -7,7 +7,9 @@ import 'package:audist/core/navigation/app_routes.dart';
 import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
 import 'package:audist/presentation/auth/login/bloc/login_bloc.dart';
+import 'package:audist/presentation/home/blocs/allcase/all_case_bloc.dart';
 import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
+import 'package:audist/providers/common_data_provider.dart';
 import 'package:audist/providers/language_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,7 +20,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
     TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
 
@@ -123,7 +125,7 @@ class LoginScreen extends StatelessWidget {
 
                         // * Login form
                         Form(
-                          key: _formKey,
+                          key: formKey,
                           child: Column(
                             spacing: AppSizes.spacingMedium,
                             children: [
@@ -164,14 +166,20 @@ class LoginScreen extends StatelessWidget {
                                   if (state is LoginSuccess) {
                                     context.read<FetchCaseBloc>().add(
                                       RequestFetchCase(uid: state.userId!),
-                                    );
+                                    ); // to fetch next cases
+                                    context.read<CommonDataProvider>().saveUser(
+                                      state.userId!,
+                                    ); // to save user id in a provider
+                                    context.read<AllCaseBloc>().add(
+                                      RequestAllCase(uid: state.userId!),
+                                    ); // to fetch all cases
                                     AppNavigator.pushReplacement(
                                       AppRoutes.home,
                                     );
-                                  }else if(state is LoginEmailSended){
+                                  } else if (state is LoginEmailSended) {
                                     AppAlert.show(
                                       context,
-                                      type: AlertType.error,
+                                      type: AlertType.info,
                                       title: "Verify your email",
                                       description: state.message,
                                     );
@@ -206,7 +214,7 @@ class LoginScreen extends StatelessWidget {
                                       ),
                                     ),
                                     onPressed: () {
-                                      if (_formKey.currentState!.validate()) {
+                                      if (formKey.currentState!.validate()) {
                                         context.read<LoginBloc>().add(
                                           RequestLogin(
                                             emailController.text.trim(),

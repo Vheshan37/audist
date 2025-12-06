@@ -14,6 +14,7 @@ import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
 import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
 import 'package:audist/presentation/splash/bloc/authorization_bloc.dart';
 import 'package:audist/providers/case_filter_provider.dart';
+import 'package:audist/providers/common_data_provider.dart';
 import 'package:audist/providers/language_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -225,6 +226,11 @@ class HomeScreen extends StatelessWidget {
               BlocConsumer<FetchCaseBloc, FetchCaseState>(
                 listener: (context, state) {
                   if (state is FetchCaseLoaded) {
+                    context.read<CommonDataProvider>().modifyCaseList(
+                      value: state.caseList,
+                      today: state.todayCount!,
+                      total: state.totalCount!,
+                    );
                     final authState = context.read<AuthorizationBloc>().state;
 
                     if (authState is Authorized) {
@@ -243,6 +249,9 @@ class HomeScreen extends StatelessWidget {
                   if (state is FetchCaseLoaded) {
                     todayCount = state.todayCount!;
                     totalCount = state.totalCount!;
+                  } else {
+                    todayCount = context.read<CommonDataProvider>().todayCount!;
+                    totalCount = context.read<CommonDataProvider>().totalCount!;
                   }
                   return Row(
                     spacing: AppSizes.spacingMedium,
@@ -368,7 +377,11 @@ class HomeScreen extends StatelessWidget {
                               Icon(item['icon'], color: AppColors.brandAccent),
                               Text(
                                 item['title'],
-                                style: TextStyle(color: AppColors.brandAccent),
+                                style: TextStyle(
+                                  color: AppColors.brandAccent,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: AppSizes.bodyMedium,
+                                ),
                               ),
                             ],
                           ),

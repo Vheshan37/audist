@@ -19,7 +19,7 @@ class PaymentHistoryCollection {
     _users.add(model);
   }
 
-  void getCollection() {
-    
+  List<PaymentHistoryModel> getCollection() {
+    return _users;
   }
 }

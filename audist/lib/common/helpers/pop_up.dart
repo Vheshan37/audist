@@ -12,8 +12,10 @@ import 'package:audist/domain/cases/entities/case_entity.dart';
 import 'package:audist/presentation/cases/case_information/blocs/details/case_information_detail_bloc.dart';
 import 'package:audist/providers/case_information_provider.dart';
 import 'package:audist/providers/common_data_provider.dart';
+import 'package:audist/providers/payment_information_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 class PopUp {
   TextEditingController datePickerController = TextEditingController();
@@ -185,6 +187,21 @@ class PopUp {
                     AppNavigator.push(
                       AppRoutes.addPayment,
                       arguments: caseInformation,
+                    );
+                    context.read<PaymentInformationProvider>().setCaseID(
+                      caseInformation?.refereeNo,
+                    );
+                    context.read<PaymentInformationProvider>().setCaseName(
+                      caseInformation?.name,
+                    );
+                    context
+                        .read<PaymentInformationProvider>()
+                        .setCaseOrganization(caseInformation?.organization);
+                    context.read<PaymentInformationProvider>().setCaseValue(
+                      NumberFormat.currency(
+                        locale: 'en_US',
+                        symbol: 'Rs.',
+                      ).format(caseInformation?.value),
                     );
                   },
                 ),

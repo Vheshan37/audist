@@ -1,7 +1,9 @@
+import 'package:audist/common/helpers/converter_helper.dart';
 import 'package:audist/core/model/add_payment/add_payment_request_model.dart';
 import 'package:audist/core/model/fetch_payment/fetch_payment_request.dart';
 import 'package:audist/core/model/fetch_payment/fetch_payment_response.dart';
 import 'package:audist/domain/cases/usecase/fetch_case_payment_usecase.dart';
+import 'package:audist/providers/payment_information_provider.dart';
 import 'package:audist/service_locator.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
@@ -26,6 +28,20 @@ class FetchPaymentBloc extends Bloc<FetchPaymentEvent, FetchPaymentState> {
         }),
         ((data) {
           emit(FetchPaymentSuccess(data: data));
+          sl<PaymentInformationProvider>().setDueAmount(
+            ConverterHelper.formatCurrency(
+              ConverterHelper.objectToDouble(
+                data.fetchPaymentResponseCase?.remaining,
+              ),
+            ),
+          );
+          sl<PaymentInformationProvider>().setPaidAmount(
+            ConverterHelper.formatCurrency(
+              ConverterHelper.objectToDouble(
+                data.fetchPaymentResponseCase?.totalPaid,
+              ),
+            ),
+          );
           debugPrint("RequestFetchPayment Success");
         }),
       );

@@ -1,26 +1,68 @@
+import 'package:audist/common/helpers/app_alert.dart';
+import 'package:audist/common/helpers/converter_helper.dart';
+import 'package:audist/common/helpers/ledger_pdf.dart';
 import 'package:audist/common/widgets/custom_app_bar.dart';
 import 'package:audist/common/widgets/custom_background.dart';
 import 'package:audist/common/widgets/custom_button.dart';
 import 'package:audist/common/widgets/custom_input.dart';
 import 'package:audist/common/widgets/drawer.dart';
 import 'package:audist/core/color.dart';
-import 'package:audist/core/fake_database/ledger_table.dart';
-import 'package:audist/core/sizes.dart';
-import 'package:audist/core/string.dart';
+import 'package:audist/core/model/fetch_payment/fetch_payment_request.dart';
+import 'package:audist/core/model/fetch_payment/fetch_payment_response.dart';
+import 'package:audist/domain/cases/entities/case_entity.dart';
+import 'package:audist/presentation/payments/add_payment/blocs/fetch_payment/fetch_payment_bloc.dart';
+import 'package:audist/presentation/payments/payment_history/bloc/download_ledger_bloc.dart';
+import 'package:audist/providers/common_data_provider.dart';
 import 'package:audist/providers/language_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import 'package:audist/core/sizes.dart';
+import 'package:audist/core/string.dart';
 
 class PaymentHistoryScreen extends StatelessWidget {
   const PaymentHistoryScreen({super.key});
 
+  void _fetchCasePayment(
+    BuildContext context,
+    FetchPaymentRequest fetchPaymentRequest,
+  ) {
+    context.read<FetchPaymentBloc>().add(
+      RequestFetchPayment(request: fetchPaymentRequest),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final UserCollection users = UserCollection();
     final verticalScrollController = ScrollController();
     final horizontalScrollController = ScrollController();
 
     TextEditingController caseNumberController = TextEditingController();
+    String? caseRefereeNo;
+    String? caseName;
+    String? caseOrganization;
+    String? caseValue;
+    String? selectedCaseId;
+
+    // Grab case entity from route arguments
+    final Object? object = ModalRoute.of(context)?.settings.arguments;
+    List<CashCollection> collection = [];
+    if (object is CaseEntity) {
+      final caseEntity = object;
+      selectedCaseId = caseEntity.caseNumber;
+      caseNumberController.text = caseEntity.caseNumber!;
+      caseRefereeNo = caseEntity.refereeNo!;
+      caseName = caseEntity.name!;
+      caseOrganization = caseEntity.organization!;
+      caseValue = ConverterHelper.formatCurrency(caseEntity.value!);
+
+      FetchPaymentRequest fetchPaymentRequest = FetchPaymentRequest(
+        caseNumb: caseEntity.caseNumber!,
+        userId: context.read<CommonDataProvider>().uid!,
+        includePayments: true,
+      );
+      _fetchCasePayment(context, fetchPaymentRequest);
+    }
 
     return CustomBackground(
       child: Consumer<LanguageProvider>(
@@ -28,11 +70,11 @@ class PaymentHistoryScreen extends StatelessWidget {
           backgroundColor: Colors.transparent,
           appBar: CustomAppBar(title: Strings.ledger.title),
           drawer: CustomDrawer(),
-          body: SingleChildScrollView(
+          body: Padding(
             padding: EdgeInsets.all(AppSizes.paddingMedium),
             child: Column(
               children: [
-                // * 1st row (case number input + select button)
+                // Case number input + select button
                 Row(
                   spacing: AppSizes.spacingMedium,
                   children: [
@@ -45,15 +87,49 @@ class PaymentHistoryScreen extends StatelessWidget {
                     ),
                     Expanded(
                       flex: 2,
-                      child: CustomButton(
-                        content: Text(
-                          Strings.ledger.select,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: AppSizes.bodyMedium,
-                          ),
-                        ),
-                        onPressed: () {},
+                      child: BlocConsumer<FetchPaymentBloc, FetchPaymentState>(
+                        listener: (context, state) {
+                          if (state is FetchPaymentFailed) {
+                            AppAlert.show(
+                              context,
+                              type: AlertType.warning,
+                              title: "Unable to Retrieve Case",
+                              description: state.message,
+                            );
+                          }
+                        },
+                        builder: (context, state) {
+                          if (state is FetchPaymentLoading) {
+                            return CustomButton(
+                              content: CircularProgressIndicator(
+                                color: AppColors.surfaceLight,
+                              ),
+                              onPressed: () {},
+                            );
+                          }
+                          return CustomButton(
+                            content: Text(
+                              Strings.ledger.select,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: AppSizes.bodyMedium,
+                              ),
+                            ),
+                            onPressed: () {
+                              if (caseNumberController.text.isEmpty) return;
+                              _fetchCasePayment(
+                                context,
+                                FetchPaymentRequest(
+                                  caseNumb: caseNumberController.text,
+                                  userId: context
+                                      .read<CommonDataProvider>()
+                                      .uid!,
+                                  includePayments: true,
+                                ),
+                              );
+                            },
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -61,7 +137,7 @@ class PaymentHistoryScreen extends StatelessWidget {
 
                 SizedBox(height: AppSizes.spacingMedium),
 
-                // * 2nd row (case information)
+                // Case info
                 Container(
                   padding: EdgeInsets.symmetric(
                     horizontal: AppSizes.paddingSmall,
@@ -69,78 +145,13 @@ class PaymentHistoryScreen extends StatelessWidget {
                   child: Column(
                     spacing: AppSizes.spacingSmall,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              '${Strings.ledger.id} :',
-                              style: TextStyle(color: AppColors.surfaceDark),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 3,
-                            child: Text(
-                              'value',
-                              style: TextStyle(color: AppColors.surfaceDark),
-                            ),
-                          ),
-                        ],
+                      _buildInfoRow(Strings.ledger.id, caseRefereeNo),
+                      _buildInfoRow(Strings.ledger.name, caseName),
+                      _buildInfoRow(
+                        Strings.ledger.organization,
+                        caseOrganization,
                       ),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              '${Strings.ledger.name} :',
-                              style: TextStyle(color: AppColors.surfaceDark),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 3,
-                            child: Text(
-                              'value',
-                              style: TextStyle(color: AppColors.surfaceDark),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              '${Strings.ledger.organization} :',
-                              style: TextStyle(color: AppColors.surfaceDark),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 3,
-                            child: Text(
-                              'value',
-                              style: TextStyle(color: AppColors.surfaceDark),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              '${Strings.ledger.value} :',
-                              style: TextStyle(color: AppColors.surfaceDark),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 3,
-                            child: Text(
-                              'value',
-                              style: TextStyle(color: AppColors.surfaceDark),
-                            ),
-                          ),
-                        ],
-                      ),
+                      _buildInfoRow(Strings.ledger.value, caseValue),
                     ],
                   ),
                 ),
@@ -149,116 +160,78 @@ class PaymentHistoryScreen extends StatelessWidget {
                 Divider(),
                 SizedBox(height: AppSizes.spacingMedium),
 
-                // * 3rd row (table section) - Dynamic width based on content
-                Container(
-                  height: 460,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: AppColors.surfaceDark.withOpacity(0.2),
-                    ),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      // Use available width or minimum width for table
-                      final tableWidth = constraints.maxWidth < 600
-                          ? 600.0
-                          : constraints.maxWidth;
+                // Table -> fills remaining space
+                Expanded(
+                  child: BlocBuilder<FetchPaymentBloc, FetchPaymentState>(
+                    builder: (context, state) {
+                      if (state is FetchPaymentSuccess) {
+                        collection =
+                            state
+                                .data
+                                .fetchPaymentResponseCase
+                                ?.cashCollection ??
+                            [];
+                      }
 
                       return Scrollbar(
-                        controller: horizontalScrollController,
-                        scrollbarOrientation: ScrollbarOrientation.bottom,
+                        controller: verticalScrollController,
+                        thumbVisibility: true,
                         child: SingleChildScrollView(
-                          controller: horizontalScrollController,
                           scrollDirection: Axis.horizontal,
+                          controller: horizontalScrollController,
                           child: SizedBox(
-                            width: tableWidth,
+                            width: 700, // adjust based on column widths
                             child: Column(
                               children: [
-                                // Fixed Table Header
+                                // Fixed header
                                 Container(
-                                  decoration: BoxDecoration(
-                                    color: AppColors.brandAccent,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(5),
-                                      topRight: Radius.circular(5),
-                                    ),
-                                  ),
                                   padding: EdgeInsets.symmetric(
                                     vertical: 16,
                                     horizontal: 12,
                                   ),
+                                  color: AppColors.brandAccent,
                                   child: Row(
                                     children: [
                                       Expanded(
                                         flex: 2,
-                                        child: _buildHeaderCell(Strings.ledger.date),
+                                        child: _buildHeaderCell(
+                                          Strings.ledger.date,
+                                        ),
                                       ),
                                       Expanded(
                                         flex: 5,
-                                        child: _buildHeaderCell(Strings.ledger.description),
+                                        child: _buildHeaderCell(
+                                          Strings.ledger.description,
+                                        ),
                                       ),
                                       Expanded(
                                         flex: 2,
-                                        child: _buildHeaderCell(Strings.ledger.payment),
+                                        child: _buildHeaderCell(
+                                          Strings.ledger.payment,
+                                        ),
                                       ),
                                       Expanded(
                                         flex: 2,
-                                        child: _buildHeaderCell(Strings.ledger.balance),
+                                        child: _buildHeaderCell(
+                                          Strings.ledger.balance,
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
 
-                                // Scrollable Table Body (only vertical scroll)
+                                // Body
                                 Expanded(
-                                  child: Scrollbar(
-                                    controller: verticalScrollController,
-                                    thumbVisibility: true,
-                                    child: ListView.builder(
-                                      controller: verticalScrollController,
-                                      itemCount: users.users.length,
-                                      itemBuilder: (context, index) {
-                                        final user = users.users[index];
-                                        return Container(
-                                          decoration: BoxDecoration(
-                                            color: index % 2 == 0
-                                                ? Colors.transparent
-                                                : AppColors.surfaceDark.withOpacity(0.05),
-                                            border: Border(
-                                              bottom: BorderSide(
-                                                color: AppColors.surfaceDark.withOpacity(0.2),
-                                              ),
-                                            ),
-                                          ),
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: 12,
-                                            horizontal: 12,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                flex: 2,
-                                                child: _buildDataCell(user.date),
-                                              ),
-                                              Expanded(
-                                                flex: 5,
-                                                child: _buildDataCell(user.description),
-                                              ),
-                                              Expanded(
-                                                flex: 2,
-                                                child: _buildDataCell(user.payment),
-                                              ),
-                                              Expanded(
-                                                flex: 2,
-                                                child: _buildDataCell(user.balance),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
+                                  child: collection.isEmpty
+                                      ? Center(child: Text("No data"))
+                                      : ListView.builder(
+                                          controller: verticalScrollController,
+                                          itemCount: collection.length,
+                                          itemBuilder: (context, index) {
+                                            final item = collection[index];
+                                            return _buildTableRow(item, index);
+                                          },
+                                        ),
                                 ),
                               ],
                             ),
@@ -271,20 +244,148 @@ class PaymentHistoryScreen extends StatelessWidget {
 
                 SizedBox(height: AppSizes.spacingMedium),
 
-                // * 4th Row
-                CustomButton(
-                  content: Text(
-                    Strings.ledger.download,
-                    style: TextStyle(color: AppColors.surfaceLight),
-                  ),
-                  onPressed: () {
-                    // TODO: implement pdf download process
+                // Download button -> fixed at bottom
+                BlocConsumer<DownloadLedgerBloc, DownloadLedgerState>(
+                  listener: (context, state) => {
+                    if (state is LedgerSuccess)
+                      {
+                        AppAlert.show(
+                          context,
+                          type: AlertType.success,
+                          title: "Ledger Downloaded",
+                          description:
+                              "Ledger has been downloaded successfully.",
+                        ),
+                      }
+                    else if (state is LedgerError)
+                      {
+                        AppAlert.show(
+                          context,
+                          type: AlertType.error,
+                          title: "Download Failed",
+                          description: state.message,
+                        ),
+                      },
+                  },
+                  builder: (context, state) {
+                    if (state is LedgerLoading) {
+                      debugPrint("Ledger is loading...");
+                      return CustomButton(
+                        content: CircularProgressIndicator(
+                          color: AppColors.surfaceLight,
+                        ),
+                        onPressed: () {},
+                      );
+                    }
+
+                    debugPrint("Ledger is Loaded or Failed.");
+
+                    return CustomButton(
+                      content: Text(
+                        Strings.ledger.download,
+                        style: TextStyle(color: AppColors.surfaceLight),
+                      ),
+                      onPressed: () async {
+                        // implement PDF download
+                        if (collection.isEmpty || selectedCaseId == null) {
+                          AppAlert.show(
+                            context,
+                            type: AlertType.warning,
+                            title: "No Data",
+                            description:
+                                "No payment data available to generate ledger.",
+                          );
+                          return;
+                        }
+
+                        // await generateLoanLedgerPDF();
+                        context.read<DownloadLedgerBloc>().add(
+                          DownloadAndSaveLedger(
+                            selectedCaseId,
+                            context.read<CommonDataProvider>().uid!,
+                          ),
+                        );
+                      },
+                    );
                   },
                 ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String? value) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: Text(
+            '$label :',
+            style: TextStyle(color: AppColors.surfaceDark),
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Text(
+            value ?? "N/A",
+            style: TextStyle(color: AppColors.surfaceDark),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTableRow(CashCollection item, int index) {
+    return Container(
+      decoration: BoxDecoration(
+        color: index % 2 == 0
+            ? Colors.transparent
+            : AppColors.surfaceDark.withOpacity(0.05),
+        border: Border(
+          bottom: BorderSide(color: AppColors.surfaceDark.withOpacity(0.2)),
+        ),
+      ),
+      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: _buildDataCell(
+              item.collectionDate != null
+                  ? ConverterHelper.dateTimeToCustomString(
+                      item.collectionDate!,
+                      'dd/MM/yyyy',
+                    )
+                  : "N/A",
+            ),
+          ),
+          Expanded(flex: 5, child: _buildDataCell(item.description ?? "N/A")),
+          Expanded(
+            flex: 2,
+            child: _buildDataCell(
+              item.payment != null
+                  ? ConverterHelper.formatCurrency(
+                      ConverterHelper.objectToDouble(item.payment),
+                    )
+                  : "N/A",
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: _buildDataCell(
+              item.remainingAfterPayment != null
+                  ? ConverterHelper.formatCurrency(
+                      ConverterHelper.objectToDouble(
+                        item.remainingAfterPayment,
+                      ),
+                    )
+                  : "N/A",
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -308,9 +409,7 @@ class PaymentHistoryScreen extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 8.0),
       child: Text(
         text,
-        style: TextStyle(
-          color: AppColors.surfaceDark,
-        ),
+        style: TextStyle(color: AppColors.surfaceDark),
         overflow: TextOverflow.ellipsis,
         maxLines: 2,
       ),

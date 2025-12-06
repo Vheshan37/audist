@@ -27,4 +27,7 @@ router.post("/viewallcases", getAllCasesByStatus);
 router.post("/casesbydivision", getAllCasesByDivision);
 router.get("/divisions", getAllDivisions);
 
+
+
+
 module.exports = router; 
