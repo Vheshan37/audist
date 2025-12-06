@@ -11,6 +11,7 @@ import 'package:audist/presentation/home/blocs/allcase/all_case_bloc.dart';
 import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
 import 'package:audist/presentation/payments/add_payment/blocs/add_payment/add_payment_bloc.dart';
 import 'package:audist/presentation/payments/add_payment/blocs/fetch_payment/fetch_payment_bloc.dart';
+import 'package:audist/presentation/payments/payment_history/bloc/download_ledger_bloc.dart';
 import 'package:audist/presentation/splash/bloc/authorization_bloc.dart';
 import 'package:audist/presentation/splash/pages/splash_screen.dart';
 import 'package:audist/providers/case_filter_provider.dart';
@@ -62,6 +63,7 @@ void main() async {
             BlocProvider(create: (context) => AddPaymentBloc()),
             BlocProvider(create: (context) => FetchPaymentBloc()),
             BlocProvider(create: (context) => FilterNextCaseBloc()),
+            BlocProvider(create: (context) => DownloadLedgerBloc()),
           ],
           child: const MyApp(),
         ),

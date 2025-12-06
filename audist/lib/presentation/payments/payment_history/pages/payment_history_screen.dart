@@ -11,6 +11,7 @@ import 'package:audist/core/model/fetch_payment/fetch_payment_request.dart';
 import 'package:audist/core/model/fetch_payment/fetch_payment_response.dart';
 import 'package:audist/domain/cases/entities/case_entity.dart';
 import 'package:audist/presentation/payments/add_payment/blocs/fetch_payment/fetch_payment_bloc.dart';
+import 'package:audist/presentation/payments/payment_history/bloc/download_ledger_bloc.dart';
 import 'package:audist/providers/common_data_provider.dart';
 import 'package:audist/providers/language_provider.dart';
 import 'package:flutter/material.dart';
@@ -41,12 +42,14 @@ class PaymentHistoryScreen extends StatelessWidget {
     String? caseName;
     String? caseOrganization;
     String? caseValue;
+    String? selectedCaseId;
 
     // Grab case entity from route arguments
     final Object? object = ModalRoute.of(context)?.settings.arguments;
     List<CashCollection> collection = [];
     if (object is CaseEntity) {
       final caseEntity = object;
+      selectedCaseId = caseEntity.caseNumber;
       caseNumberController.text = caseEntity.caseNumber!;
       caseRefereeNo = caseEntity.refereeNo!;
       caseName = caseEntity.name!;
@@ -242,30 +245,67 @@ class PaymentHistoryScreen extends StatelessWidget {
                 SizedBox(height: AppSizes.spacingMedium),
 
                 // Download button -> fixed at bottom
-                CustomButton(
-                  content: Text(
-                    Strings.ledger.download,
-                    style: TextStyle(color: AppColors.surfaceLight),
-                  ),
-                  onPressed: () async {
-                    // implement PDF download
-                    if (collection.isEmpty) {
-                      AppAlert.show(
-                        context,
-                        type: AlertType.warning,
-                        title: "No data",
-                        description: "There is no ledger data to download.",
+                BlocConsumer<DownloadLedgerBloc, DownloadLedgerState>(
+                  listener: (context, state) => {
+                    if (state is LedgerSuccess)
+                      {
+                        AppAlert.show(
+                          context,
+                          type: AlertType.success,
+                          title: "Ledger Downloaded",
+                          description:
+                              "Ledger has been downloaded successfully.",
+                        ),
+                      }
+                    else if (state is LedgerError)
+                      {
+                        AppAlert.show(
+                          context,
+                          type: AlertType.error,
+                          title: "Download Failed",
+                          description: state.message,
+                        ),
+                      },
+                  },
+                  builder: (context, state) {
+                    if (state is LedgerLoading) {
+                      debugPrint("Ledger is loading...");
+                      return CustomButton(
+                        content: CircularProgressIndicator(
+                          color: AppColors.surfaceLight,
+                        ),
+                        onPressed: () {},
                       );
-                      return;
                     }
 
-                    await generateLoanLedgerPDF();
+                    debugPrint("Ledger is Loaded or Failed.");
 
-                    AppAlert.show(
-                      context,
-                      type: AlertType.success,
-                      title: "PDF Saved",
-                      description: "Ledger report saved to documents folder.",
+                    return CustomButton(
+                      content: Text(
+                        Strings.ledger.download,
+                        style: TextStyle(color: AppColors.surfaceLight),
+                      ),
+                      onPressed: () async {
+                        // implement PDF download
+                        if (collection.isEmpty || selectedCaseId == null) {
+                          AppAlert.show(
+                            context,
+                            type: AlertType.warning,
+                            title: "No Data",
+                            description:
+                                "No payment data available to generate ledger.",
+                          );
+                          return;
+                        }
+
+                        // await generateLoanLedgerPDF();
+                        context.read<DownloadLedgerBloc>().add(
+                          DownloadAndSaveLedger(
+                            selectedCaseId,
+                            context.read<CommonDataProvider>().uid!,
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

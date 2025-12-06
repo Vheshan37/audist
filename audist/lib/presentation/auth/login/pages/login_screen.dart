@@ -7,6 +7,7 @@ import 'package:audist/core/navigation/app_routes.dart';
 import 'package:audist/core/sizes.dart';
 import 'package:audist/core/string.dart';
 import 'package:audist/presentation/auth/login/bloc/login_bloc.dart';
+import 'package:audist/presentation/home/blocs/allcase/all_case_bloc.dart';
 import 'package:audist/presentation/home/blocs/cases/fetch_case_bloc.dart';
 import 'package:audist/providers/common_data_provider.dart';
 import 'package:audist/providers/language_provider.dart';
@@ -165,13 +166,13 @@ class LoginScreen extends StatelessWidget {
                                   if (state is LoginSuccess) {
                                     context.read<FetchCaseBloc>().add(
                                       RequestFetchCase(uid: state.userId!),
-                                    );
-                                    context.read<FetchCaseBloc>().add(
-                                      RequestFetchCase(uid: state.userId!),
-                                    );
+                                    ); // to fetch next cases
                                     context.read<CommonDataProvider>().saveUser(
                                       state.userId!,
-                                    );
+                                    ); // to save user id in a provider
+                                    context.read<AllCaseBloc>().add(
+                                      RequestAllCase(uid: state.userId!),
+                                    ); // to fetch all cases
                                     AppNavigator.pushReplacement(
                                       AppRoutes.home,
                                     );
