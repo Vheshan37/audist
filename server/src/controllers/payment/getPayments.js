@@ -5,8 +5,6 @@ const prisma = new PrismaClient();
 const PDFDocument = require("pdfkit");
 const puppeteer = require("puppeteer");
 
-
-
 const caseWithCaseNumb = async (req, res) => {
   const { caseNumb, userID, includePayments } = req.body;
 
@@ -20,7 +18,7 @@ const caseWithCaseNumb = async (req, res) => {
         case_number: caseNumb,
         user_id: userID,
         case_status: {
-          status: { not: "pending" }
+          status: { not: "pending" },
         },
       },
       select: {
@@ -45,14 +43,15 @@ const caseWithCaseNumb = async (req, res) => {
               payment: true,
               collection_date: true,
             },
-
           },
         }),
       },
     });
 
     if (!caseWithCaseNumb) {
-      return res.status(404).json({ message: "No case found with that number" });
+      return res
+        .status(404)
+        .json({ message: "No case found with that number" });
     }
 
     let totalPaid = 0;
@@ -62,14 +61,16 @@ const caseWithCaseNumb = async (req, res) => {
     if (includePayments && caseWithCaseNumb.cash_collection.length > 0) {
       let runningTotal = 0;
 
-      caseWithCaseNumb.cash_collection = caseWithCaseNumb.cash_collection.map((pay) => {
-        runningTotal += pay.payment;
+      caseWithCaseNumb.cash_collection = caseWithCaseNumb.cash_collection.map(
+        (pay) => {
+          runningTotal += pay.payment;
 
-        return {
-          ...pay,
-          remaining_after_payment: caseWithCaseNumb.value - runningTotal,
-        };
-      });
+          return {
+            ...pay,
+            remaining_after_payment: caseWithCaseNumb.value - runningTotal,
+          };
+        }
+      );
 
       totalPaid = runningTotal;
       remaining = caseWithCaseNumb.value - totalPaid;
@@ -84,15 +85,11 @@ const caseWithCaseNumb = async (req, res) => {
         }),
       },
     });
-
   } catch (err) {
     console.error("Error fetching case by number:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
-
-
 
 const addPayment = async (req, res) => {
   const {
@@ -107,8 +104,7 @@ const addPayment = async (req, res) => {
   // 🧾 Validate required fields
   if (!case_number || !payment || !payment_date || !userID) {
     return res.status(400).json({
-      error:
-        "case_number, payment, payment_date, and userID are required.",
+      error: "case_number, payment, payment_date, and userID are required.",
     });
   }
 
@@ -188,12 +184,7 @@ const addPayment = async (req, res) => {
     console.error("Error adding payment:", err);
     res.status(500).json({ error: err.message });
   }
-
-
 };
-
-
-
 
 // ----------------------------------------------------
 // Fetch Ledger Data
@@ -360,9 +351,15 @@ const renderLedgerHtml = (data) => {
       </div>
 
       <div>
-        <p><b>වටිනාකම:</b> <span class="value">රු. ${data.case_value.toFixed(2)}</span></p>
-        <p><b>ගෙවා අවසන් මුදල:</b> <span class="value">රු. ${data.totals.total_paid.toFixed(2)}</span></p>
-        <p><b>ගෙවීමට ඉතිරි මුදල:</b> <span class="value">රු. ${data.totals.remaining_amount.toFixed(2)}</span></p>
+        <p><b>වටිනාකම:</b> <span class="value">රු. ${data.case_value.toFixed(
+          2
+        )}</span></p>
+        <p><b>ගෙවා අවසන් මුදල:</b> <span class="value">රු. ${data.totals.total_paid.toFixed(
+          2
+        )}</span></p>
+        <p><b>ගෙවීමට ඉතිරි මුදල:</b> <span class="value">රු. ${data.totals.remaining_amount.toFixed(
+          2
+        )}</span></p>
       </div>
     </div>
 
@@ -418,7 +415,11 @@ const generateLoanLedgerPDF = async (req, res) => {
 
     const html = renderLedgerHtml(data);
 
-    const browser = await puppeteer.launch({ headless: "new" });
+    // const browser = await puppeteer.launch({ headless: "new" });
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "networkidle0" });
 
@@ -443,7 +444,4 @@ const generateLoanLedgerPDF = async (req, res) => {
   }
 };
 
-
-
-
-module.exports = { caseWithCaseNumb, addPayment , generateLoanLedgerPDF};
+module.exports = { caseWithCaseNumb, addPayment, generateLoanLedgerPDF };
